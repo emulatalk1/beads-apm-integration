@@ -13,10 +13,35 @@ APM provides methodology for breaking down projects and coordinating AI agents. 
 | Manual handover docs | Agents query Beads |
 | No queryable state | `bd ready`, `bd blocked` |
 
+## Installation
+
+### Quick Install (Recommended)
+
+```bash
+# Install in current directory
+curl -fsSL https://raw.githubusercontent.com/hbchuc/beads-apm-integration/main/install.sh | bash
+
+# Install in specific directory
+curl -fsSL https://raw.githubusercontent.com/hbchuc/beads-apm-integration/main/install.sh | bash -s /path/to/project
+```
+
+The installer automatically detects your setup and handles:
+- **New projects** - Initializes git, Beads, and all APM files
+- **Existing projects** - Adds only what's missing
+- **Existing APM projects** - Migrates to Beads, upgrades guides
+- **Existing Beads projects** - Adds APM methodology
+
+### Manual Install
+
+1. Initialize Beads: `npx beads-cli init`
+2. Copy `.apm/` directory to your project
+3. Copy `.claude/commands/` to your project
+4. Copy or merge `CLAUDE.md`
+
 ## Prerequisites
 
 - Claude Code CLI
-- Beads CLI (`bd`)
+- Node.js (for Beads CLI)
 
 ## Usage
 
@@ -59,6 +84,8 @@ bd close <id>
 .claude/commands/
   apm-setup.md                    # /apm-setup command
   apm-start.md                    # /apm-start command
+
+install.sh                        # Installation script
 ```
 
 ## Documentation
