@@ -34,12 +34,12 @@ The installer automatically detects your setup and handles:
 ### Migration from Original APM
 
 When migrating from original APM, the installer:
-- Backs up your `.apm/` directory to `.apm.backup.YYYYMMDDHHMMSS`
-- Backs up original APM command files to `.claude/commands.apm.backup.YYYYMMDDHHMMSS`
-- Removes the 6 original APM commands (`apm-1` through `apm-6`) after backup
+- Backs up your `.apm/` directory to `.backup/YYYYMMDDHHMMSS/.apm/`
+- Backs up original APM command files to `.backup/YYYYMMDDHHMMSS/.claude/commands/`
+- Removes the 8 original APM commands (`apm-1` through `apm-8`) after backup
 - Installs new Beads-APM commands (`apm-setup` and `apm-start`)
 
-Your original commands are preserved in the timestamped backup directory if you need to reference them.
+Your original files are preserved in the unified `.backup/YYYYMMDDHHMMSS/` directory if you need to reference them.
 
 ### Manual Install
 
