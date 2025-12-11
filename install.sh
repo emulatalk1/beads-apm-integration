@@ -73,6 +73,16 @@ detect_apm() {
     return 1
 }
 
+# Detect if APM is original (markdown-based) or our Beads variant
+detect_beads_apm() {
+    if [ -f "$TARGET_DIR/.apm/metadata.json" ]; then
+        if grep -q '"variant":\s*"beads-apm"' "$TARGET_DIR/.apm/metadata.json" 2>/dev/null; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
 detect_claude_commands() {
     if [ -d "$TARGET_DIR/.claude/commands" ]; then
         return 0
@@ -225,6 +235,7 @@ echo ""
 HAS_GIT=false
 HAS_BEADS=false
 HAS_APM=false
+HAS_BEADS_APM=false
 HAS_CLAUDE_COMMANDS=false
 HAS_CLAUDE_MD=false
 
@@ -244,7 +255,12 @@ fi
 
 if detect_apm; then
     HAS_APM=true
-    echo -e "  ${GREEN}✓${NC} APM guides present"
+    if detect_beads_apm; then
+        HAS_BEADS_APM=true
+        echo -e "  ${GREEN}✓${NC} APM guides present (Beads variant)"
+    else
+        echo -e "  ${YELLOW}!${NC} APM guides present (original - will migrate)"
+    fi
 else
     echo -e "  ${YELLOW}○${NC} No APM guides"
 fi
@@ -269,9 +285,12 @@ echo ""
 if ! $HAS_GIT && ! $HAS_BEADS && ! $HAS_APM; then
     INSTALL_TYPE="new"
     echo -e "${BLUE}Installation type:${NC} New project"
-elif $HAS_APM && $HAS_BEADS; then
+elif $HAS_APM && $HAS_BEADS_APM && $HAS_BEADS; then
     INSTALL_TYPE="upgrade"
-    echo -e "${BLUE}Installation type:${NC} Upgrade existing APM + Beads setup"
+    echo -e "${BLUE}Installation type:${NC} Upgrade existing Beads-APM setup"
+elif $HAS_APM && ! $HAS_BEADS_APM; then
+    INSTALL_TYPE="migrate_original_apm"
+    echo -e "${BLUE}Installation type:${NC} Migrate original APM to Beads-APM"
 elif $HAS_APM && ! $HAS_BEADS; then
     INSTALL_TYPE="migrate"
     echo -e "${BLUE}Installation type:${NC} Migrate APM to Beads"
@@ -359,6 +378,51 @@ case $INSTALL_TYPE in
         echo ""
         echo -e "${YELLOW}Note: You may have existing APM state in markdown files.${NC}"
         echo -e "${YELLOW}Consider migrating tasks to Beads with 'bd create'.${NC}"
+        ;;
+
+    "migrate_original_apm")
+        echo -e "${BLUE}Migrating original APM to Beads-APM...${NC}"
+        echo ""
+
+        # Backup original APM
+        if [ -d "$TARGET_DIR/.apm" ]; then
+            backup_dir="$TARGET_DIR/.apm.original.backup.$(date +%Y%m%d%H%M%S)"
+            cp -r "$TARGET_DIR/.apm" "$backup_dir"
+            echo -e "${BLUE}  Backed up original APM to ${backup_dir}${NC}"
+        fi
+
+        # Install Beads if not present
+        if ! $HAS_BEADS; then
+            install_beads
+        fi
+
+        # Replace APM guides with Beads-aware versions
+        echo -e "${YELLOW}Replacing original APM guides with Beads-APM guides...${NC}"
+        rm -rf "$TARGET_DIR/.apm/guides"
+        install_apm_guides
+
+        # Install/upgrade Claude commands
+        install_claude_commands
+
+        # Update CLAUDE.md
+        if $HAS_CLAUDE_MD; then
+            append_to_claude_md
+        else
+            install_claude_md
+        fi
+
+        echo ""
+        echo -e "${GREEN}Migration complete!${NC}"
+        echo ""
+        echo -e "${YELLOW}Important notes:${NC}"
+        echo -e "  • Original APM backed up to: ${backup_dir}"
+        echo -e "  • Original APM used markdown files for state management"
+        echo -e "  • Beads-APM uses 'bd' commands instead"
+        echo ""
+        echo -e "${YELLOW}If you have existing tasks in Implementation_Plan.md:${NC}"
+        echo -e "  1. Review your old plan: cat ${backup_dir}/docs/Implementation_Plan.md"
+        echo -e "  2. Create issues in Beads: bd create --title=\"Task name\" --type=task"
+        echo -e "  3. Add dependencies: bd dep add <consumer> <producer>"
         ;;
 
     "add_apm")
