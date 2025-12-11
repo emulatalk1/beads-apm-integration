@@ -28,8 +28,18 @@ curl -fsSL https://raw.githubusercontent.com/emulatalk1/beads-apm-integration/ma
 The installer automatically detects your setup and handles:
 - **New projects** - Initializes git, Beads, and all APM files
 - **Existing projects** - Adds only what's missing
-- **Existing APM projects** - Migrates to Beads, upgrades guides
+- **Existing APM projects** - Migrates to Beads, upgrades guides (see Migration below)
 - **Existing Beads projects** - Adds APM methodology
+
+### Migration from Original APM
+
+When migrating from original APM, the installer:
+- Backs up your `.apm/` directory to `.apm.backup.YYYYMMDDHHMMSS`
+- Backs up original APM command files to `.claude/commands.apm.backup.YYYYMMDDHHMMSS`
+- Removes the 6 original APM commands (`apm-1` through `apm-6`) after backup
+- Installs new Beads-APM commands (`apm-setup` and `apm-start`)
+
+Your original commands are preserved in the timestamped backup directory if you need to reference them.
 
 ### Manual Install
 

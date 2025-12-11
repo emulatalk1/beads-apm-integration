@@ -391,6 +391,45 @@ case $INSTALL_TYPE in
             echo -e "${BLUE}  Backed up original APM to ${backup_dir}${NC}"
         fi
 
+        # Backup and remove original APM command files
+        # Original APM uses 6 command files (apm-1 through apm-6) which conflict with Beads-APM.
+        # We backup these files to .claude/commands.apm.backup.TIMESTAMP before removing them.
+        # This preserves any customizations users may have made while allowing Beads-APM to work.
+        timestamp="$(date +%Y%m%d%H%M%S)"
+        commands_backup_dir="$TARGET_DIR/.claude/commands.apm.backup.${timestamp}"
+        original_commands=(
+            "apm-1-initiate-setup.md"
+            "apm-2-initiate-manager.md"
+            "apm-3-initiate-implementation.md"
+            "apm-4-initiate-adhoc.md"
+            "apm-5-handover-manager.md"
+            "apm-6-handover-implementation.md"
+        )
+
+        # Check if any original commands exist
+        has_original_commands=false
+        for cmd_file in "${original_commands[@]}"; do
+            if [ -f "$TARGET_DIR/.claude/commands/${cmd_file}" ]; then
+                has_original_commands=true
+                break
+            fi
+        done
+
+        if $has_original_commands; then
+            echo -e "${YELLOW}Backing up and removing original APM command files...${NC}"
+            mkdir -p "$commands_backup_dir"
+
+            for cmd_file in "${original_commands[@]}"; do
+                if [ -f "$TARGET_DIR/.claude/commands/${cmd_file}" ]; then
+                    cp "$TARGET_DIR/.claude/commands/${cmd_file}" "$commands_backup_dir/${cmd_file}"
+                    rm "$TARGET_DIR/.claude/commands/${cmd_file}"
+                    echo -e "  Backed up and removed: ${cmd_file}"
+                fi
+            done
+
+            echo -e "${BLUE}  Backed up original APM commands to ${commands_backup_dir}${NC}"
+        fi
+
         # Install Beads if not present
         if ! $HAS_BEADS; then
             install_beads
@@ -416,6 +455,9 @@ case $INSTALL_TYPE in
         echo ""
         echo -e "${YELLOW}Important notes:${NC}"
         echo -e "  • Original APM backed up to: ${backup_dir}"
+        if $has_original_commands; then
+            echo -e "  • Original APM commands backed up to: ${commands_backup_dir}"
+        fi
         echo -e "  • Original APM used markdown files for state management"
         echo -e "  • Beads-APM uses 'bd' commands instead"
         echo ""
