@@ -14,7 +14,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # GitHub repository for templates
-GITHUB_REPO="hbchuc/beads-apm-integration"
+GITHUB_REPO="emulatalk1/beads-apm-integration"
 GITHUB_BRANCH="main"
 GITHUB_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}"
 

@@ -19,10 +19,10 @@ APM provides methodology for breaking down projects and coordinating AI agents. 
 
 ```bash
 # Install in current directory
-curl -fsSL https://raw.githubusercontent.com/hbchuc/beads-apm-integration/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/emulatalk1/beads-apm-integration/main/install.sh | bash
 
 # Install in specific directory
-curl -fsSL https://raw.githubusercontent.com/hbchuc/beads-apm-integration/main/install.sh | bash -s /path/to/project
+curl -fsSL https://raw.githubusercontent.com/emulatalk1/beads-apm-integration/main/install.sh | bash -s /path/to/project
 ```
 
 The installer automatically detects your setup and handles:
