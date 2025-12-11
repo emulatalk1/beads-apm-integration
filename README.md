@@ -98,6 +98,10 @@ bd close <id>
 install.sh                        # Installation script
 ```
 
-## Documentation
+## How It Works
 
-See [BEADS_APM_INTEGRATION.md](./BEADS_APM_INTEGRATION.md) for full design details.
+- **Context Synthesis** - Gather requirements through Q&A
+- **Project Breakdown** - Create structured Beads issues with dependencies
+- **Task Assignment** - Manager spawns agents via Task tool based on issue assignee
+- **Execution** - Agents update Beads state as they work
+- **Coordination** - Query `bd ready`, `bd blocked`, `bd stats` for current state

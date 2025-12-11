@@ -35,6 +35,6 @@ A ready-to-use kit that replaces APM's markdown-based state management with Bead
 - `bd close` - Complete work
 - `bd ready` - Find available work
 
-## Reference
+## How It Works
 
-See `BEADS_APM_INTEGRATION.md` for the complete design document.
+APM guides in `.apm/guides/` provide detailed methodology for each phase.
