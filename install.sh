@@ -489,6 +489,36 @@ case $INSTALL_TYPE in
         ;;
 esac
 
+# ============================================================================
+# Post-Installation Health Check
+# ============================================================================
+
+echo ""
+echo -e "${BLUE}Running health check...${NC}"
+echo ""
+
+cd "$TARGET_DIR"
+if command -v bd &> /dev/null; then
+    # Capture bd doctor output and exit code
+    DOCTOR_OUTPUT=$(bd doctor 2>&1) || true
+    DOCTOR_EXIT=$?
+
+    echo "$DOCTOR_OUTPUT"
+    echo ""
+
+    # Check if there are issues (bd doctor returns non-zero or output contains warnings/errors)
+    if [ $DOCTOR_EXIT -ne 0 ] || echo "$DOCTOR_OUTPUT" | grep -qiE "(error|warning|issue|missing|not found|failed)"; then
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${YELLOW}Some issues were detected. You can fix them by running:${NC}"
+        echo -e "  ${GREEN}bd doctor --fix${NC}"
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    else
+        echo -e "${GREEN}✓ All health checks passed${NC}"
+    fi
+else
+    echo -e "${YELLOW}Warning: bd command not found. Please ensure @beads/bd is installed.${NC}"
+fi
+
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║                  Installation Complete!                    ║${NC}"
