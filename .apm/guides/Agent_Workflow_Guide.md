@@ -17,6 +17,9 @@ This guide defines how Manager and Implementation Agents work using Beads for st
 # Get project overview
 bd stats
 
+# Discover available agents (see Agent_Discovery_Guide.md)
+find .claude/agents -name "*.md" -type f
+
 # See what's active
 bd list --status=in_progress
 
@@ -32,15 +35,17 @@ bd blocked
 When a task is ready:
 
 ```bash
-# Get task details
+# Get task details (includes labels)
 bd show <issue-id>
 ```
+
+Check for `agent:*` label in the output. If present, use that agent type. Otherwise, apply the decision framework from Agent_Discovery_Guide.md to select an appropriate agent.
 
 Spawn an Implementation Agent via Task tool:
 
 ```
 Task(
-  subagent_type="general-purpose",
+  subagent_type="<agent-from-label>",  # e.g., "general-purpose", "explore", "plan", or custom agent name
   prompt="""
   You are an Implementation Agent. Complete this task:
 
@@ -117,20 +122,33 @@ bd comments add <issue-id> "Tests passing"
 
 ### Delegating Sub-tasks
 
-If you need research or debugging help, use Task tool:
+If you need research or debugging help, select an appropriate agent type (see Agent_Discovery_Guide.md for complete decision framework).
 
-**Research:**
+**Check available agents if needed:**
+```bash
+find .claude/agents -name "*.md" -type f  # Discover custom agents
+```
+
+**Research/Exploration:**
 ```
 Task(
-  subagent_type="general-purpose",
-  prompt="Research: [topic]. Return findings in markdown."
+  subagent_type="explore",  # Fast read-only analysis
+  prompt="Research: [topic]. Search codebase for patterns and examples. Return findings in markdown."
 )
 ```
 
-**Debug:**
+**Planning/Strategic Analysis:**
 ```
 Task(
-  subagent_type="general-purpose",
+  subagent_type="plan",  # Read-only with web search capability
+  prompt="Research: [topic]. Analyze approach options and recommend best practices. Return findings in markdown."
+)
+```
+
+**Debug/Implementation:**
+```
+Task(
+  subagent_type="general-purpose",  # Full tool access for modifications
   prompt="Debug: [error]. Reproduce: [steps]. Find root cause and fix."
 )
 ```

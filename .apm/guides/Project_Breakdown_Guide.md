@@ -167,7 +167,9 @@ bd create --title="Coordination Notes" --type=chore \
   --description="High-level decisions and coordination notes for this project"
 ```
 
-**Only after Beads is ready**, proceed to phase cycles (see §4).
+**Run Agent Discovery**: Before proceeding to phase cycles, follow the `Agent_Discovery_Guide.md` to identify available agents (built-in and custom) and understand agent selection criteria. This establishes the agent types that will be referenced during task creation in §4.4.
+
+**Only after Beads is ready and agent discovery is complete**, proceed to phase cycles (see §4).
 
 ## 4. Phase Cycle Execution
 
@@ -263,7 +265,7 @@ bd create --title="Phase X: <Name>" --type=epic
 
 **Create Task Issues:**
 ```bash
-bd create --title="<Task Title>" --type=task -l <domain-label> \
+bd create --title="<Task Title>" --type=task -l <domain-label> -l agent:<agent-type> \
   --description="$(cat <<'EOF'
 ## Objective
 [One-sentence task goal]
@@ -291,6 +293,24 @@ bd dep add <task-B-id> <task-A-id>
 **Label Convention:**
 - Use labels that fit your project (e.g., `auth`, `api`, `ui`, `testing`)
 - No rigid naming required
+
+**Agent Selection:**
+Select appropriate agent type based on task characteristics (see `Agent_Discovery_Guide.md` for complete decision framework):
+
+- **Implementation tasks** (writing code, creating files, running tests, making system changes) → `agent:general-purpose`
+  - Requires full tool access for read/write/execute operations
+
+- **Research & planning tasks** (analyzing architecture, reviewing documentation, strategic planning, requirements synthesis) → `agent:plan`
+  - Read-only access with web search for comprehensive research without accidental modifications
+
+- **Quick codebase exploration** (finding patterns, locating files, checking conventions, reading documentation) → `agent:explore`
+  - Fast Haiku model optimized for read-only analysis with rapid turnaround
+
+- **Domain-specific tasks** (specialized work requiring specific tool sets or expertise) → `agent:<custom-name>`
+  - Check for custom agents via: `find .claude/agents -name "*.md" -type f`
+  - Use custom agent if available and matches task domain requirements
+
+**Agent label format:** Always use `agent:<name>` prefix (e.g., `agent:general-purpose`, `agent:explore`, `agent:plan`, `agent:database-specialist`)
 
 ## 5. Final Review & Cross-Agent Integration
 

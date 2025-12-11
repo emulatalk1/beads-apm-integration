@@ -99,18 +99,58 @@ Ask user about [specific clarification areas].
 - Document all relevant outputs, interfaces, usage patterns
 - Always include clarification pathway for ambiguous points
 
-### 1.4. Adding Context to Task Prompt
+### 1.4. Agent Selection and Validation
 
-Include dependency context in the Task tool prompt:
+Before spawning an agent, determine the appropriate agent type from issue labels.
+
+**Discovery process:**
+
+1. **Check for agent label in issue:**
+   ```bash
+   bd show <issue-id>  # Look for labels with "agent:" prefix
+   ```
+
+2. **Validate agent availability:**
+   - If `agent:general-purpose`, `agent:explore`, or `agent:plan` → Use directly (built-in agents)
+   - If `agent:<custom-name>` → Verify custom agent exists:
+     ```bash
+     find .claude/agents -name "<custom-name>.md" -type f
+     ```
+
+3. **Fallback behavior:**
+   - If labeled agent not found, **STOP** and ask user:
+     ```
+     ⚠️ Issue <issue-id> is labeled for agent:<name>, but this agent doesn't exist.
+
+     Available agents:
+     - agent:general-purpose (built-in)
+     - agent:explore (built-in)
+     - agent:plan (built-in)
+     [+ any discovered custom agents from .claude/agents/]
+
+     Please update the issue label with: bd update <issue-id> -l agent:<correct-name>
+     ```
+
+4. **No agent label present:**
+   - Apply Agent Discovery Guide decision framework (see `.apm/guides/Agent_Discovery_Guide.md`)
+   - Default to `agent:general-purpose` for implementation tasks
+   - Ask user to confirm agent selection if task requirements are unclear
+
+**Reference:** See `Agent_Discovery_Guide.md` for complete agent capabilities and selection criteria.
+
+### 1.5. Adding Context to Task Prompt
+
+Include dependency context in the Task tool prompt with dynamically selected agent:
 
 ```python
+# Example: Using agent label from issue
 Task(
-  subagent_type="general-purpose",
+  subagent_type="<agent-name-from-label>",  # e.g., "general-purpose", "explore", "plan", or custom agent name
   prompt="""
   You are an Implementation Agent. Complete this task:
 
-  Task ID: <issue-id>
-  Title: <title>
+  **Task ID:** <issue-id>
+  **Title:** <title>
 
   ## Context from Dependencies
   [Use Section 1.2 or 1.3 template based on domain]
@@ -122,13 +162,23 @@ Task(
   [From issue description]
 
   ## Workflow
-  1. bd update <issue-id> --status=in_progress
+  1. Run: bd update <issue-id> --status=in_progress
   2. Do the work
-  3. bd comments add <issue-id> "progress"
-  4. bd close <issue-id> --reason="summary"
+  3. Log progress: bd comments add <issue-id> "progress"
+  4. When done: bd close <issue-id> --reason="summary"
+
+  Return a summary of what was accomplished.
   """
 )
 ```
+
+**Label format examples:**
+- `agent:general-purpose` → `subagent_type="general-purpose"`
+- `agent:explore` → `subagent_type="explore"`
+- `agent:plan` → `subagent_type="plan"`
+- `agent:database-specialist` → `subagent_type="database-specialist"`
+
+**Important:** The `subagent_type` parameter uses only the agent name (without the `agent:` prefix).
 
 ---
 
