@@ -384,19 +384,22 @@ case $INSTALL_TYPE in
         echo -e "${BLUE}Migrating original APM to Beads-APM...${NC}"
         echo ""
 
+        # Create unified backup directory structure
+        timestamp="$(date +%Y%m%d%H%M%S)"
+        backup_dir="$TARGET_DIR/.backup/${timestamp}/.apm"
+        commands_backup_dir="$TARGET_DIR/.backup/${timestamp}/.claude/commands"
+
         # Backup original APM
         if [ -d "$TARGET_DIR/.apm" ]; then
-            backup_dir="$TARGET_DIR/.apm.original.backup.$(date +%Y%m%d%H%M%S)"
-            cp -r "$TARGET_DIR/.apm" "$backup_dir"
+            mkdir -p "$backup_dir"
+            cp -r "$TARGET_DIR/.apm/"* "$backup_dir/"
             echo -e "${BLUE}  Backed up original APM to ${backup_dir}${NC}"
         fi
 
         # Backup and remove original APM command files
-        # Original APM uses 6 command files (apm-1 through apm-6) which conflict with Beads-APM.
-        # We backup these files to .claude/commands.apm.backup.TIMESTAMP before removing them.
+        # Original APM uses 8 command files (apm-1 through apm-8) which conflict with Beads-APM.
+        # We backup these files to .backup/TIMESTAMP/.claude/commands/ before removing them.
         # This preserves any customizations users may have made while allowing Beads-APM to work.
-        timestamp="$(date +%Y%m%d%H%M%S)"
-        commands_backup_dir="$TARGET_DIR/.claude/commands.apm.backup.${timestamp}"
         original_commands=(
             "apm-1-initiate-setup.md"
             "apm-2-initiate-manager.md"
@@ -404,6 +407,8 @@ case $INSTALL_TYPE in
             "apm-4-initiate-adhoc.md"
             "apm-5-handover-manager.md"
             "apm-6-handover-implementation.md"
+            "apm-7-delegate-research.md"
+            "apm-8-delegate-debug.md"
         )
 
         # Check if any original commands exist
