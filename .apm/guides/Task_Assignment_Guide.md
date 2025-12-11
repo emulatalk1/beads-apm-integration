@@ -101,39 +101,39 @@ Ask user about [specific clarification areas].
 
 ### 1.4. Agent Selection and Validation
 
-Before spawning an agent, determine the appropriate agent type from issue labels.
+Before spawning an agent, determine the appropriate agent type from the issue's assignee field.
 
 **Discovery process:**
 
-1. **Check for agent label in issue:**
+1. **Check for agent assignee in issue:**
    ```bash
-   bd show <issue-id>  # Look for labels with "agent:" prefix
+   bd show <issue-id>  # Look for "Assignee:" field
    ```
 
 2. **Validate agent availability:**
-   - If `agent:general-purpose`, `agent:explore`, or `agent:plan` → Use directly (built-in agents)
-   - If `agent:<custom-name>` → Verify custom agent exists:
+   - If `general-purpose`, `explore`, or `plan` → Use directly (built-in agents)
+   - If custom agent name → Verify custom agent exists:
      ```bash
      find .claude/agents -name "<custom-name>.md" -type f
      ```
 
 3. **Fallback behavior:**
-   - If labeled agent not found, **STOP** and ask user:
+   - If assigned agent not found, **STOP** and ask user:
      ```
-     ⚠️ Issue <issue-id> is labeled for agent:<name>, but this agent doesn't exist.
+     ⚠️ Issue <issue-id> is assigned to "<name>", but this agent doesn't exist.
 
      Available agents:
-     - agent:general-purpose (built-in)
-     - agent:explore (built-in)
-     - agent:plan (built-in)
+     - general-purpose (built-in)
+     - explore (built-in)
+     - plan (built-in)
      [+ any discovered custom agents from .claude/agents/]
 
-     Please update the issue label with: bd update <issue-id> -l agent:<correct-name>
+     Please update the issue assignee with: bd update <issue-id> -a <correct-name>
      ```
 
-4. **No agent label present:**
+4. **No assignee present:**
    - Apply Agent Discovery Guide decision framework (see `.apm/guides/Agent_Discovery_Guide.md`)
-   - Default to `agent:general-purpose` for implementation tasks
+   - Default to `general-purpose` for implementation tasks
    - Ask user to confirm agent selection if task requirements are unclear
 
 **Reference:** See `Agent_Discovery_Guide.md` for complete agent capabilities and selection criteria.
@@ -143,9 +143,9 @@ Before spawning an agent, determine the appropriate agent type from issue labels
 Include dependency context in the Task tool prompt with dynamically selected agent:
 
 ```python
-# Example: Using agent label from issue
+# Example: Using agent from issue assignee field
 Task(
-  subagent_type="<agent-name-from-label>",  # e.g., "general-purpose", "explore", "plan", or custom agent name
+  subagent_type="<agent-from-assignee>",  # e.g., "general-purpose", "explore", "plan", or custom agent name
   prompt="""
   You are an Implementation Agent. Complete this task:
 
@@ -172,13 +172,13 @@ Task(
 )
 ```
 
-**Label format examples:**
-- `agent:general-purpose` → `subagent_type="general-purpose"`
-- `agent:explore` → `subagent_type="explore"`
-- `agent:plan` → `subagent_type="plan"`
-- `agent:database-specialist` → `subagent_type="database-specialist"`
+**Assignee to subagent_type mapping:**
+- Assignee `general-purpose` → `subagent_type="general-purpose"`
+- Assignee `explore` → `subagent_type="explore"`
+- Assignee `plan` → `subagent_type="plan"`
+- Assignee `database-specialist` → `subagent_type="database-specialist"`
 
-**Important:** The `subagent_type` parameter uses only the agent name (without the `agent:` prefix).
+**Note:** The `subagent_type` parameter uses the assignee value directly.
 
 ---
 

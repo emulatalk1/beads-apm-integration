@@ -35,17 +35,17 @@ bd blocked
 When a task is ready:
 
 ```bash
-# Get task details (includes labels)
+# Get task details (includes assignee)
 bd show <issue-id>
 ```
 
-Check for `agent:*` label in the output. If present, use that agent type. Otherwise, apply the decision framework from Agent_Discovery_Guide.md to select an appropriate agent.
+Check for the assignee field in the output. If present, use that agent type. Otherwise, apply the decision framework from Agent_Discovery_Guide.md to select an appropriate agent.
 
 Spawn an Implementation Agent via Task tool:
 
 ```
 Task(
-  subagent_type="<agent-from-label>",  # e.g., "general-purpose", "explore", "plan", or custom agent name
+  subagent_type="<agent-from-assignee>",  # e.g., "general-purpose", "explore", "plan", or custom agent name
   prompt="""
   You are an Implementation Agent. Complete this task:
 

@@ -265,7 +265,7 @@ bd create --title="Phase X: <Name>" --type=epic
 
 **Create Task Issues:**
 ```bash
-bd create --title="<Task Title>" --type=task -l <domain-label> -l agent:<agent-type> \
+bd create --title="<Task Title>" --type=task -l <domain-label> -a <agent-type> \
   --description="$(cat <<'EOF'
 ## Objective
 [One-sentence task goal]
@@ -294,23 +294,23 @@ bd dep add <task-B-id> <task-A-id>
 - Use labels that fit your project (e.g., `auth`, `api`, `ui`, `testing`)
 - No rigid naming required
 
-**Agent Selection:**
-Select appropriate agent type based on task characteristics (see `Agent_Discovery_Guide.md` for complete decision framework):
+**Agent Assignment:**
+Assign appropriate agent using `-a <agent-type>` based on task characteristics (see `Agent_Discovery_Guide.md` for complete decision framework):
 
-- **Implementation tasks** (writing code, creating files, running tests, making system changes) → `agent:general-purpose`
+- **Implementation tasks** (writing code, creating files, running tests, making system changes) → `-a general-purpose`
   - Requires full tool access for read/write/execute operations
 
-- **Research & planning tasks** (analyzing architecture, reviewing documentation, strategic planning, requirements synthesis) → `agent:plan`
+- **Research & planning tasks** (analyzing architecture, reviewing documentation, strategic planning, requirements synthesis) → `-a plan`
   - Read-only access with web search for comprehensive research without accidental modifications
 
-- **Quick codebase exploration** (finding patterns, locating files, checking conventions, reading documentation) → `agent:explore`
+- **Quick codebase exploration** (finding patterns, locating files, checking conventions, reading documentation) → `-a explore`
   - Fast Haiku model optimized for read-only analysis with rapid turnaround
 
-- **Domain-specific tasks** (specialized work requiring specific tool sets or expertise) → `agent:<custom-name>`
+- **Domain-specific tasks** (specialized work requiring specific tool sets or expertise) → `-a <custom-name>`
   - Check for custom agents via: `find .claude/agents -name "*.md" -type f`
   - Use custom agent if available and matches task domain requirements
 
-**Agent label format:** Always use `agent:<name>` prefix (e.g., `agent:general-purpose`, `agent:explore`, `agent:plan`, `agent:database-specialist`)
+**Assignee format:** Use agent name directly (e.g., `-a general-purpose`, `-a explore`, `-a plan`, `-a database-specialist`)
 
 ## 5. Final Review & Cross-Agent Integration
 
