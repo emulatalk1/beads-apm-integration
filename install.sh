@@ -314,7 +314,7 @@ case $INSTALL_TYPE in
         if ! $HAS_GIT; then
             echo -e "${YELLOW}Initializing git repository...${NC}"
             cd "$TARGET_DIR"
-            git init
+            git init -b main
             echo -e "${GREEN}✓ Git initialized${NC}"
         fi
 
@@ -391,7 +391,7 @@ case $INSTALL_TYPE in
             fi
             if $INIT_GIT; then
                 cd "$TARGET_DIR"
-                git init
+                git init -b main
                 echo -e "${GREEN}✓ Git initialized${NC}"
             fi
         fi
