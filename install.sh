@@ -275,12 +275,16 @@ fi
 
 echo ""
 
-# Confirm installation
-read -p "Proceed with installation? [Y/n] " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[Nn]$ ]]; then
-    echo -e "${YELLOW}Installation cancelled.${NC}"
-    exit 0
+# Confirm installation (skip if non-interactive / piped)
+if [ -t 0 ]; then
+    read -p "Proceed with installation? [Y/n] " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo -e "${YELLOW}Installation cancelled.${NC}"
+        exit 0
+    fi
+else
+    echo -e "${YELLOW}Non-interactive mode: proceeding with installation...${NC}"
 fi
 
 echo ""
@@ -367,9 +371,15 @@ case $INSTALL_TYPE in
 
         # Initialize git if not present
         if ! $HAS_GIT; then
-            read -p "Initialize git repository? [Y/n] " -n 1 -r
-            echo ""
-            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            INIT_GIT=true
+            if [ -t 0 ]; then
+                read -p "Initialize git repository? [Y/n] " -n 1 -r
+                echo ""
+                if [[ $REPLY =~ ^[Nn]$ ]]; then
+                    INIT_GIT=false
+                fi
+            fi
+            if $INIT_GIT; then
                 cd "$TARGET_DIR"
                 git init
                 echo -e "${GREEN}✓ Git initialized${NC}"
