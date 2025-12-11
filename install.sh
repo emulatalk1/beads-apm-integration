@@ -94,7 +94,7 @@ detect_claude_md() {
 install_beads() {
     echo -e "${YELLOW}Installing Beads...${NC}"
     cd "$TARGET_DIR"
-    npx beads-cli init
+    npx @beads/bd init
     echo -e "${GREEN}✓ Beads initialized${NC}"
 }
 
