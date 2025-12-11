@@ -1,5 +1,5 @@
-# APM 0.5.3 - Context Synthesis Guide
-This guide defines how the Setup Agent collects all information needed to build an accurate and detailed Implementation Plan. The goal is gathering enough context to break work into focused, manageable tasks that can be assigned to specialized agents. At this stage, the Setup Agent passes control flow to this guide.
+# Context Synthesis Guide
+This guide defines how the Setup Agent collects all information needed to create well-structured Beads issues. The goal is gathering enough context to break work into focused, manageable tasks that can be assigned to specialized agents. At this stage, the Setup Agent passes control flow to this guide.
 
 ## Principles for Discovery & Objectives
 
@@ -39,27 +39,27 @@ When user specifies delivery requirements, documentation standards, or output fo
 When user describes tool preferences, environment constraints, or technical requirements → Note for task execution guidance and agent instruction specification
 When user indicates tracking requirements, progress validation, or completion criteria → Note explicit review checkpoints as task-level or phase-level implementation requirements
 
-These retained insights inform adaptive work breakdown during the Implementation Plan creation phase.
+These retained insights inform adaptive work breakdown during the Beads issue creation phase.
 
 ## Internal Strategic Framework
 **CRITICAL**: Never expose multi-agent concepts to user. Maintain natural conversation while operating with internal strategic awareness of your planning role.
 
 ### Setup Agent Role Clarity
 **YOU ARE THE PLANNER, NOT THE EXECUTOR**:
-- **Your Role**: Create detailed Implementation Plan that other agents will use
-- **Manager Agent Role**: Will manage project execution using your Implementation Plan  
-- **Implementation Agent Role**: Will execute individual tasks you specify in the plan
-- **Your Responsibility**: Break down user requirements into actionable tasks for OTHER agents to execute
+- **Your Role**: Create Beads issues that other agents will use
+- **Manager Agent Role**: Will manage project execution using Beads queries
+- **Implementation Agent Role**: Will execute individual tasks from Beads issues
+- **Your Responsibility**: Break down user requirements into actionable Beads issues for OTHER agents to execute
 
 ### Context Synthesis Planning Process
-You are gathering requirements to create an Implementation Plan that will enable:
-- **Manager Agent** to coordinate specialized Implementation Agents effectively
-- **Implementation Agents** to execute focused, well-defined granular tasks 
+You are gathering requirements to create Beads issues that will enable:
+- **Manager Agent** to coordinate specialized Implementation Agents effectively via Task tool
+- **Implementation Agents** to execute focused, well-defined granular tasks
 - **User** to collaborate with Implementation Agents on external actions when needed
-- **Quality Standards & Requirements** to be embedded in task specifications for Implementation Agent compliance
+- **Quality Standards & Requirements** to be embedded in issue descriptions for Implementation Agent compliance
 
 ### Strategic Planning Considerations
-While maintaining natural conversation with user, internally consider how gathered information will translate into Implementation Plan elements:
+While maintaining natural conversation with user, internally consider how gathered information will translate into Beads issues:
 
 - **Task Granularity**: How to break work into focused tasks that Implementation Agents can execute independently
 - **Agent Specialization**: What domain boundaries make sense for assigning different Implementation Agents
@@ -70,11 +70,11 @@ While maintaining natural conversation with user, internally consider how gather
 
 ### Planning Perspective Framework
 **Remember**: You are designing a workflow for others to execute:
-- **Manager Agent** will coordinate timing, dependencies, and cross-agent handoffs using your plan structure
-- **Implementation Agents** will receive Task Assignment Prompts based on your Implementation Plan
+- **Manager Agent** will coordinate timing, dependencies, and cross-agent handoffs using Beads queries
+- **Implementation Agents** will be spawned via Task tool based on your Beads issues
 - **User** will provide input, approve work, and handle external actions as specified in your task breakdowns
-- **Your Plan Quality** directly determines Implementation Agent success - be precise and comprehensive
-- **All your questions must be phrased to gather *requirements for this plan*, not to ask how *you* (the Setup Agent) should perform the work.**
+- **Your Issue Quality** directly determines Implementation Agent success - be precise and comprehensive
+- **All your questions must be phrased to gather *requirements for these issues*, not to ask how *you* (the Setup Agent) should perform the work.**
 
 ## Discovery Sequence & Iterative Methodology
 During project discovery, the Setup Agent must follow this sequence with **mandatory iterative follow-ups per Question Round**:
@@ -220,14 +220,14 @@ Present comprehensive summary covering:
 
 **Explicitly request user feedback:** "Please review this summary carefully. I want to ensure I've understood your project correctly before breaking it into tasks. Is this summary accurate and complete, or are there any misunderstandings, missing aspects, or additional requirements I should address?"
 
-**If user provides summary approval:** 
+**If user provides summary approval:**
 - State "Question Round 4 complete. Context Synthesis Step complete. All Question Rounds finished."
-- Return to Setup Agent Initiation Prompt at **Step 2: Project Breakdown & Plan Creation Step**
+- Proceed to **Project Breakdown** to create Beads issues
 
-**If user provides context corrections:** 
+**If user provides context corrections:**
 - Incorporate user feedback and return to appropriate Question Round for additional follow-ups
 - Complete that Question Round fully before proceeding
 - Continue through remaining Question Rounds in sequence
 
-## Pass Control Flow Back to the Initiation Prompt
-**ONLY after completing ALL four Question Rounds and receiving user approval in Question Round 4**, switch control flow back to the .claude/commands/apm-1-initiate-setup.md prompt at **Step 2: Project Breakdown & Plan Creation Step**.
+## Next Step
+**ONLY after completing ALL four Question Rounds and receiving user approval in Question Round 4**, proceed to Project Breakdown to create Beads issues with dependencies.

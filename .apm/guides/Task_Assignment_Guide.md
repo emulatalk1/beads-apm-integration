@@ -1,247 +1,175 @@
-# APM 0.5.3 - Task Assignment Guide
-This guide defines how Manager Agents issue task assignments to Implementation Agents and evaluate their completion. Task assignments coordinate agent work during the Task Loop of an APM session, following the Implementation Plan.
+# Task Assignment Guide
 
-## 1. Task Loop Overview
-Manager Agent issues Task Assignment Prompt → User passes to Implementation Agent → Implementation Agent executes task and logs work → User returns log to Manager → Manager reviews and determines next action (continue, follow-up, delegate, or plan update).
+This guide covers **Manager-specific** details for spawning Implementation Agents: dependency context handling, user explanations, and next action decisions.
 
-## 2. Task Assignment Prompt Format
-Task Assignment Prompts must correlate 1-1 with Implementation Plan tasks and include all necessary context for successful execution. Manager Agent must issue these prompts following this format:
+For general workflow (spawning, reviewing, bd commands), see `Agent_Workflow_Guide.md`.
 
-### 2.1. Dependency Check
-Before creating any Task Assignment Prompt check for task dependencies.
-
-**Step 1: Identify Dependencies**
-Check Implementation Plan task's `Guidance` field for dependency declarations:
-- `"Depends on: Task X.Y Output"` = Same-agent dependency
-- `"Depends on: Task X.Y Output by Agent Z"` = **CROSS-AGENT DEPENDENCY**
-
-**Step 2: Determine Context Integration Approach**
-- **Same Agent** (no "by Agent X" tag) → Use **Simple Contextual Reference** (Section 4.1)
-- **Cross Agent** (has "by Agent X" tag) → Use **MANDATORY Comprehensive Integration Context** (Section 4.2)
-
-### **Cross-Agent Dependency Warning**
-**CRITICAL**: Cross-agent dependencies require Implementation Agents to complete detailed file reading and integration steps BEFORE starting main task work.
-
-### 2.2. User Explanation Requests
-When Users request explanations for upcoming complex tasks, Manager Agent should include detailed explanation instructions within the `## Detailed Instructions` section of the Task Assignment Prompt.
-
-**Explanation Timing Protocol**:
-- **Single-Step Tasks**: Provide brief approach introduction BEFORE execution, detailed explanation AFTER task completion
-- **Multi-Step Tasks**: Apply same pattern to each step - brief approach introduction BEFORE each step execution, detailed explanation AFTER each step completion
-
-**Integration Approach**: Add explanation instructions as part of the task execution flow, specifying:
-- **What aspects** need detailed explanation (technical approach, decision rationale, architectural impact)  
-- **Explanation scope** for complex technical areas
-- **Timing requirements** following the protocol above
-
-**Implementation**: Include explanation instructions alongside normal task instructions in the `## Detailed Instructions` section. Use clear formatting to distinguish explanation requirements from execution requirements. **Only include explanation instructions when they are explicitly requested by the User.**
-
-### 2.3. Prompt Structure with YAML Frontmatter
-Include optional sections only when their front-matter boolean is true
-
-```markdown
----
-task_ref: "Task <m.n> - Title"
-agent_assignment: "Agent_<Domain>"
-memory_log_path: "path/to/log/file"
-execution_type: "single-step | multi-step"
-dependency_context: true | false
-ad_hoc_delegation: true | false
 ---
 
-# APM Task Assignment: [Task Title]
+## 1. Dependency Context Integration
 
-## Task Reference
-Implementation Plan: **Task X.Y - [Title]** assigned to **[Agent_<Domain>]**
+When consumer tasks depend on producer outputs (via `bd dep add`), Manager provides context based on domain labels.
 
-## Context from Dependencies
-[Only include if dependency_context: true]
-[Manager fills this section with section §4 content guidance]
+### 1.1. Determine Context Approach
 
-## Objective
-[One-sentence task goal from Implementation Plan]
+Before spawning an agent, check dependencies:
 
-## Detailed Instructions
-[Based on Implementation Plan subtasks:]
-- For single-step tasks: "Complete all items in one response"
-- For multi-step tasks: "Complete in X exchanges, one step per response. **AWAIT USER CONFIRMATION** before proceeding to each subsequent step."
-- Transform subtask bullets into actionable instructions specifying: what to do, how to approach it, where to implement, and what constraints/libraries to use
-- Include context from task Objective, Output, and Guidance fields
-
-## Expected Output
-- Deliverables: [from Implementation Plan Output field]
-- Success criteria: [clear completion definition]
-- File locations: [specific paths for created/modified files]
-
-## Memory Logging
-Upon completion, you **MUST** log work in: `[memory_log_path]`
-Follow .apm/guides/Memory_Log_Guide.md instructions.
-
-## Reporting Protocol
-After logging, you **MUST** output a **Final Task Report** code block.
-- **Format:** Use the exact template provided in your .claude/commands/apm-3-initiate-implementation.md instructions.
-- **Perspective:** Write it from the User's perspective so they can copy-paste it back to the Manager.
-
-## Ad-Hoc Delegation
-[Only include if ad_hoc_delegation: true]
-[Manager fills this section with section §7 content guidance, including explicit command references for Debug/Research delegations (.claude/commands/apm-8-delegate-debug.md or .claude/commands/apm-7-delegate-research.md)]
+```bash
+bd show <issue-id>  # Shows dependencies
 ```
 
-### 2.4. Delivery Format  
-Present Task Assignment Prompts as **a single markdown code block with YAML frontmatter at the top.** This ensures smooth copy-paste workflow for users transferring prompts between Manager and Implementation Agents.
+- **Same domain label** → Use **Simple Contextual Reference** (Section 1.2)
+- **Different domain labels** → Use **Comprehensive Integration Context** (Section 1.3)
 
-## 3. Context Dependency Integration
-When consumer tasks depend on producer outputs ("Depends on: Task X.Y Output" in Implementation Plan Guidance), Manager provides context based on agent assignment:
+### 1.2. Same-Domain Dependencies
 
-### 3.1. Same-Agent Dependencies (Contextual Guidance)
-When **same Implementation Agent** worked on both producer and consumer tasks:
+When **same domain** worked on both producer and consumer tasks:
 
-**Contextual Approach:**
-- Provide specific output references and key implementation details to recall
-- Include relevant file locations and important artifacts created
-- Assume working familiarity but provide concrete guidance for integration
-- Detail level varies based on dependency complexity and time gap between tasks
+**Approach:**
+- Provide specific output references and key implementation details
+- Include relevant file locations and important artifacts
+- Assume working familiarity but provide concrete guidance
 
-**Simple Same-Agent Context Example:**
+**Simple Example:**
 ```markdown
 ## Context from Dependencies
-Based on your Task 2.1 work, use the authentication middleware you created in `src/middleware/auth.js` and the JWT validation functions for this frontend integration task.
+Based on Task 2.1 work, use the authentication middleware in `src/middleware/auth.js` and the JWT validation functions for this frontend integration task.
 ```
 
-**Complex Same-Agent Context Example:**
+**Complex Example:**
 ```markdown
 ## Context from Dependencies
-Building on your Task 2.3 API implementation:
+Building on Task 2.3 API implementation:
 
 **Key Outputs to Use:**
 - Authentication endpoints in `src/api/auth.js` (POST /api/login, GET /api/verify)
 - User validation middleware in `src/middleware/auth.js`
 - Database schema updates in `migrations/003_add_user_roles.sql`
 
-**Implementation Details to Recall:**
+**Implementation Details:**
 - JWT tokens include user role and permissions in payload
 - Error handling returns standardized error objects with code/message format
-- Rate limiting applied to login attempts (implemented in middleware)
 
 **Integration Approach:**
-For this task, extend the existing role-based permissions system you built to handle the new admin dashboard requirements.
+Extend the existing role-based permissions system for the new admin dashboard requirements.
 ```
 
-#### Same-Agent Context Guidelines
-- **Simple Dependencies**: Reference key files and outputs with brief integration guidance
-- **Complex Dependencies**: Include key outputs list, important implementation details, and clear integration approach
-- **Time-Gap Considerations**: More detail when significant time passed between related tasks
-- **File References**: Always include specific file paths for outputs that need to be used or extended
-- **Implementation Continuity**: Emphasize building on previous work rather than starting fresh
+**Guidelines:**
+- Simple dependencies: Reference key files with brief integration guidance
+- Complex dependencies: Include key outputs list, implementation details, integration approach
+- Always include specific file paths
 
-### 3.2. Cross-Agent Dependencies (Comprehensive Integration Context)
-When **different Implementation Agents** worked on producer and consumer tasks (Tasks have "by Agent X" tag):
+### 1.3. Cross-Domain Dependencies
 
-**Comprehensive Context Approach:**
+When **different domains** worked on producer and consumer tasks:
+
+**Approach:**
 - Always provide detailed integration steps with explicit file reading instructions
-- Include comprehensive output summaries and usage guidance regardless of dependency complexity
-- Provide User clarification protocols for ambiguous integration points
-- Complexity only affects the amount of integration work, not the level of detail provided
+- Include comprehensive output summaries regardless of complexity
+- Assume consumer agent has **zero familiarity** with producer work
 
-**Cross-Agent Context Template:**
-
-From each section below use the options that best fits the specific context integration requirements.
+**Template:**
 ```markdown
 ## Context from Dependencies
-This task [depends on/builds upon/integrates with] [Task X.Y description] implemented by [Producer_Agent]:
+This task depends on [Task X.Y description] implemented by [domain]:
 
-**Integration Steps (complete in one response):**
-1. [Read/Review/Examine] [specific file/documentation] at [file path] to understand [specific aspect/functionality]
-2. [Study/Analyze] [implementation files] in [directory/file paths] to understand [technical approach/data structures/patterns]
-3. [Examine/Review] [test files/examples] at [file paths] for [usage patterns/expected behaviors/integration examples]
-4. [Additional integration steps as needed for specific outputs]
+**Integration Steps (complete before main task):**
+1. Read [specific file] at [path] to understand [aspect]
+2. Study [implementation files] in [paths] to understand [patterns]
+3. Examine [test files] at [paths] for [usage examples]
 
 **Producer Output Summary:**
-- [Key functionality/feature]: [Description of what was built and how it works]
-- [Important files/endpoints]: [Locations and purposes of key outputs]
-- [Data structures/interfaces]: [Important data formats, types, or contracts]
-- [Error handling/validation]: [How errors are handled and what formats are used]
-- [Security/authentication]: [Any security measures or authentication requirements]
+- [Key functionality]: [Description]
+- [Important files/endpoints]: [Locations and purposes]
+- [Data structures]: [Important formats or contracts]
+- [Error handling]: [How errors are handled]
 
 **Integration Requirements:**
-- [Specific requirement 1]: [How consumer task must integrate with producer output]
-- [Specific requirement 2]: [Additional integration specifications]
-- [Usage patterns]: [How to properly use the producer outputs]
-- [Constraints/limitations]: [Important limitations or constraints to consider]
+- [Requirement 1]: [How to integrate]
+- [Usage patterns]: [How to use the outputs]
+- [Constraints]: [Limitations to consider]
 
-**User Clarification Protocol:**
-If [specific integration aspect] is ambiguous after completing integration steps, ask User about [specific clarification areas].
+**If Unclear:**
+Ask user about [specific clarification areas].
 ```
 
-**Cross-Agent Context Creation Guidelines:**
-- **Always Comprehensive**: Regardless of dependency complexity, provide full integration steps, output summaries, and requirements selecting from the options that match the dependency requirements
-- **File-Specific Instructions**: Always include explicit file paths and what to look for in each file
-- **Complete Output Coverage**: Document all relevant outputs, interfaces, and usage patterns from producer task
-- **Integration Requirements**: Specify exactly how consumer task should integrate with producer outputs
-- **Clarification Protocols**: Always include User clarification pathway for ambiguous integration points
-- **Assumption**: Consumer Agent has zero familiarity with producer work - explain everything needed for successful integration
+**Guidelines:**
+- Always comprehensive regardless of complexity
+- Include explicit file paths and what to look for
+- Document all relevant outputs, interfaces, usage patterns
+- Always include clarification pathway for ambiguous points
 
-### 3.3. Context Integration Execution
-**For Same-Agent Dependencies:**
-- No separate integration steps section in Task Assignment Prompt
-- Include minimal "Context from Dependencies" section with `dependency_context: true` in YAML
+### 1.4. Adding Context to Task Prompt
 
-**For Cross-Agent Dependencies:**
-- Include detailed "Context from Dependencies" section with `dependency_context: true` in YAML
-- Implementation Agent completes all integration steps in one response before main task
+Include dependency context in the Task tool prompt:
 
-### 3.4. Context Integration Guidelines for Manager Agents
+```python
+Task(
+  subagent_type="general-purpose",
+  prompt="""
+  You are an Implementation Agent. Complete this task:
 
-**Same-Agent Context Creation:**
-- Review producer task Memory Log for key outputs and deliverables
-- Reference previous work without repeating detailed instructions
-- Focus on output connection and continuation of work
+  Task ID: <issue-id>
+  Title: <title>
 
-**Cross-Agent Context Creation:**
-- Review producer task Memory Log thoroughly for outputs, file locations, approaches
-- Create detailed file reading and review instructions
-- Provide comprehensive output summary and usage guidance
-- Include User clarification protocol for complex integrations
+  ## Context from Dependencies
+  [Use Section 1.2 or 1.3 template based on domain]
 
-## 4. Memory Log Review
-When Implementation Agent returns, **review Memory Log per .apm/guides/Memory_Log_Guide.md section §5**. Assess task completion status, identify blockers, and verify outputs match Implementation Plan expectations. Scan the log's YAML frontmatter:
-- If `important_findings: true` or `compatibility_issue: true`: Read the specific source files or outputs referenced in the log to verify the findings. **Do not proceed based on the log contents alone.**
+  ## Objective
+  [From issue description]
 
-## 5. Next Action Framework
-Based on log review, determine appropriate next step:
+  ## Requirements
+  [From issue description]
 
-### 5.1. Continue Workflow
-- Task complete and successful → Issue **next Task Assignment Prompt** per Implementation Plan (Task Loop continues)
-- Phase complete → **Create phase summary**, begin next phase
+  ## Workflow
+  1. bd update <issue-id> --status=in_progress
+  2. Do the work
+  3. bd comments add <issue-id> "progress"
+  4. bd close <issue-id> --reason="summary"
+  """
+)
+```
 
-### 5.2. Follow-Up Actions
-- Task needs refinement → Send correction **follow-up prompt** to same agent (if technical blockers persist, consider **Ad-Hoc delegation in the follow-up prompt**)
-- Plan assumptions invalid or any other changes needed → **Update Implementation Plan**
+---
 
-### 5.3. Decision Criteria
-- **Complete**: All deliverables produced, requirements met
-- **Partial**: Some progress made, specific issues identified
-- **Blocked**: Cannot proceed without external input or resolution
+## 2. User Explanation Requests
 
-## 6. Ad-Hoc Delegation Protocol
-Set `ad_hoc_delegation: true` only when Implementation Plan contains explicit delegation steps for the task.
+When users request explanations for complex tasks:
 
-### 6.1. Manager Responsibilities  
-When Implementation Plan contains explicit delegation steps, Manager Agents must:
-- Extract delegation requirements from Implementation Plan step
-- **Identify delegation type** (Debug, Research, or other) from the Implementation Plan delegation step
-- **Include explicit guide references** for standard delegation types in the Task Assignment Prompt if possible
-- Specify what to delegate and expected deliverables in prompt
+**Timing Protocol:**
+- **Single-Step Tasks**: Brief intro BEFORE, detailed explanation AFTER
+- **Multi-Step Tasks**: Same pattern per step
 
-**Standard Delegation Command References**:
-- **Debug Delegation**: Reference .claude/commands/apm-8-delegate-debug.md
-- **Research Delegation**: Reference .claude/commands/apm-7-delegate-research.md  
-- **Custom Delegations**: Reference appropriate custom command files if available
+**Include in Task Prompt:**
+```markdown
+## Explanation Requirements
+- Explain [technical approach / decision rationale / architectural impact]
+- Provide brief intro before starting, detailed explanation after completing
+```
 
-### 6.2. Integration Requirements
-- Implementation Agent creates delegation prompt and manages workflow
-- Ad-Hoc agents work in a separate branch managed by the assigning Implementation Agent; they do not log into Memory
-- Original agent incorporates findings and logs delegation while User deletes delegation chat session (optional)
+Only include when explicitly requested by user.
+
+---
+
+## 3. Next Action Framework
+
+After Task tool returns results, determine next step:
+
+### 3.1. Continue Workflow
+- Task complete → Check `bd ready` for next available task
+- Phase complete → Log to coordination notes, continue with next phase
+
+### 3.2. Follow-Up Actions
+- Task needs refinement → Spawn new agent to continue/fix
+- New requirements discovered → Create new issues with `bd create`
+
+### 3.3. Decision Criteria
+
+| Status | Indicators | Action |
+|--------|------------|--------|
+| **Complete** | Issue closed, deliverables produced | Next task |
+| **Partial** | Progress logged, issue still open | Continue or reassign |
+| **Blocked** | Blocker documented in comments | Resolve blocker first |
 
 ---
 

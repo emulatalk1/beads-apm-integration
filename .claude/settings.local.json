@@ -14,7 +14,8 @@
       "Bash(npx apm:*)",
       "Bash(bd sync:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(bd ready)"
     ]
   }
 }

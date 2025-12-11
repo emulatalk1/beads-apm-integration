@@ -1,5 +1,5 @@
-# APM 0.5.3 - Project Breakdown Guide
-This guide defines how Setup Agents transform Context Synthesis findings into structured, agent-assigned task breakdowns. Following systematic high-level-to-detail methodology, it prevents template matching through strategic workflow sequencing and chat-to-file output switching. The guide ensures task breakdown precision required for Implementation Agent success while minimizing Manager Agent coordination overhead.
+# Project Breakdown Guide
+This guide defines how Setup Agents transform Context Synthesis findings into structured Beads issues with dependencies. Following systematic high-level-to-detail methodology, it ensures task breakdown precision required for Implementation Agent success while minimizing Manager Agent coordination overhead.
 
 ## 1. Context Integration & Breakdown Overview
 
@@ -30,23 +30,23 @@ To maintain efficiency, you must execute the **entire Project Breakdown Sequence
 1. **Domain Analysis** (§2) → Agent assignments **in chat**
 2. **Phase Definition** (§3) → Phase sequence **in chat** 
 3. **Phase Cycles** (§4) – **Strict Interleaved Sequence:** For each phase, perform **complete Phase X Analysis** in chat: execute **Phase Context Integration & Task Identification** (§4.1), then **Individual Task Complete Analysis** (§4.2) for ALL tasks, then **Phase Dependency Assessment** (§4.3).
-   - **Only after** completing all Phase X Analysis in chat, append Phase X contents to file following **Phase Documentation Procedure** (§4.4).
+   - **Only after** completing all Phase X Analysis in chat, create Beads issues following **Issue Creation Procedure** (§4.4).
    - **Then and only then** move to Phase X+1 and repeat the complete cycle.
-   - **Repeat** this strict interleaved sequence for all phases without batching or skipping file writes **unless explicitly instructed by the User**.
-4. **Final Review** (§5) → Agent splitting (§5.1) + cross-agent dependency marking (§5.2) + **process requirement validation in file**
-5. **Plan Approval** (§5.3) → User approval based on file + chat contents
+   - **Repeat** this strict interleaved sequence for all phases without batching or skipping issue creation **unless explicitly instructed by the User**.
+4. **Final Review** (§5) → Agent splitting (§5.1) + cross-agent dependency marking (§5.2) + **process requirement validation**
+5. **Plan Approval** (§5.3) → User approval based on `bd stats` and `bd list` output
 
 **Progression Gates**: Each step must complete before proceeding to next step
 **Integration Verification**: Each phase cycle must validate that Context Synthesis insights are explicitly integrated into task specifications
 
-### 1.3. Chat-to-File Workflow Pattern
+### 1.3. Chat-to-Beads Workflow Pattern
 Strategic context switching prevents pattern matching:
 
 **Chat Operations**: Domain identification, phase sequence, task breakdown per phase, final review decisions
-**File Operations**: Document each completed phase cycle, agent splitting updates, cross-agent dependency additions
-**Context Breaks**: File writes interrupt continuous chat writing, providing fresh perspective for each subsequent phases thus avoiding pattern-matching
+**Beads Operations**: Create issues for each completed phase cycle (`bd create`), add dependencies (`bd dep add`), update labels
+**Context Breaks**: Issue creation interrupts continuous chat writing, providing fresh perspective for each subsequent phase thus avoiding pattern-matching
 
-Structured file format (see §4.4) prevents template formation while ensuring the output is immediately ready for Manager Agent consumption.
+Structured issue format (see §4.4) prevents template formation while ensuring the output is immediately queryable by Manager Agent.
 
 ## 2. Domain Analysis & Agent Assignment
 
@@ -150,18 +150,24 @@ Present the full phase sequence with supporting rationale:
 #### Second Chat Action
 After presenting agent team assignments (see §2.2), immediately write **in chat** phase sequence analysis before beginning phase cycles (see §4). This establishes project structure foundation for systematic task breakdown.
 
-### 3.3. Implementation Plan Header Initialization
-**MANDATORY**: Before proceeding to phase cycles (see §4), you **MUST** fill in the header of the `.apm/Implementation_Plan.md` file created by the `agentic-pm` CLI tool using `apm init`.
+### 3.3. Beads Project Initialization
+**MANDATORY**: Before proceeding to phase cycles (see §4), verify Beads is initialized:
 
-The file already contains a header template with placeholders. You must:
-1. **Read the existing header** in `.apm/Implementation_Plan.md`
-2. **Fill in all header fields**:
-   - Replace `<Project Name>` with the actual project name
-   - Replace `[To be filled by Setup Agent before Project Breakdown]` in **Last Modification** field with: "Plan creation by the Setup Agent."
-   - Replace `[To be filled by Setup Agent before Project Breakdown]` in **Project Overview** field with a concise summary of the project
-3. **Save the updated header** - This is a dedicated file edit operation that must be completed before any phase content is written
+```bash
+# Check if beads is initialized
+bd stats
 
-**Only after the header is complete**, proceed to phase cycles (see §4). All phase content will be appended to this file after the header.
+# If not initialized, run:
+bd init
+```
+
+Create a coordination notes issue for high-level decisions:
+```bash
+bd create --title="Coordination Notes" --type=chore \
+  --description="High-level decisions and coordination notes for this project"
+```
+
+**Only after Beads is ready**, proceed to phase cycles (see §4).
 
 ## 4. Phase Cycle Execution
 
@@ -239,33 +245,52 @@ Determine appropriate task content:
 
 **Dependency List Presentation**: Present **in chat** complete dependency list with rationale using simple notation: "Task X.Y depends on Task Z.W output because [explicit reasoning]"
 
-### 4.4. Phase Documentation Procedure
-**CRITICAL WORKFLOW SEQUENCE**: Complete ALL individual task analyses from §4.2 and dependency assessment from §4.3 before any file operations.
+### 4.4. Issue Creation Procedure
+**CRITICAL WORKFLOW SEQUENCE**: Complete ALL individual task analyses from §4.2 and dependency assessment from §4.3 before creating Beads issues.
 
-#### File Creation Process
-1. **Complete Phase Analysis in Chat First**: Present all individual task analyses and dependencies **in chat** before proceeding to file documentation
-2. **File Operation Timing**: Append to `Implementation_Plan.md` only after complete phase cycle is presented **in chat**
-3. **Single write operation**: Each phase cycle results in **exactly one** file append containing only current phase content
+#### Issue Creation Process
+1. **Complete Phase Analysis in Chat First**: Present all individual task analyses and dependencies **in chat** before creating issues
+2. **Issue Creation Timing**: Create Beads issues only after complete phase cycle is presented **in chat**
+3. **Batch creation**: Create all issues for the phase, then add all dependencies
 
-#### Content Translation Format
-Translate completed individual analyses from §4.2-4.3 into structured file format, ensuring all reasoning insights and process requirements are preserved in task descriptions:
+#### Issue Format
+Translate completed individual analyses from §4.2-4.3 into Beads issues:
 
-* **1. Document Header:** The header should already be filled in from §3.3. **DO NOT** overwrite or modify the header when writing phase content. Only append phase sections after the existing header.
-* **2. Phase Sections:** Use level 2 headings: `## Phase <n>: <Name>`
-* **3. Task Blocks:**
-  - Use level 3 headings: `### Task <n.m> – <Title> - <Agent_<Domain>>`
-  - Directly under heading, add these meta-fields:
-    - **Objective:** One-sentence task goal.
-    - **Output:** Concrete deliverable (e.g., "Auth module files").
-    - **Guidance:** Key technical constraints or approach. Guidance for the Manager Agent to assign the task successfully.
-* **4. Sub-Task Formatting:**
-  - **Single-step**: Unordered list (`-`) for instructions.
-  - **Multi-step**: Ordered list (`1.`, `2.`) for sequential steps.
-  - **Content**: Steps/bullets derived in your Chat Analysis (§4.2) with additional detail (if needed). Preserve all individual analysis insights, process requirements, and implementation specifications from chat breakdown
-  - **Ad-Hoc delegation steps:** prefix with `Ad-Hoc Delegation – <Purpose>` as a single line (optional short guide ref); no extended content in file
-* **5. Dependency Format:** Add to the `Guidance` field of the Consumer Task:
-  - Same-agent: `**Depends on: Task X.Y Output**`
-  - Cross-agent: `**Depends on: Task X.Y Output by Agent Z**`
+**Create Phase Epic (optional for complex projects):**
+```bash
+bd create --title="Phase X: <Name>" --type=epic
+```
+
+**Create Task Issues:**
+```bash
+bd create --title="<Task Title>" --type=task -l <domain-label> \
+  --description="$(cat <<'EOF'
+## Objective
+[One-sentence task goal]
+
+## Requirements
+- [Requirement 1]
+- [Requirement 2]
+
+## Done When
+- [Acceptance criterion 1]
+- [Acceptance criterion 2]
+
+## Guidance
+[Key technical constraints, approach, notes for Implementation Agent]
+EOF
+)"
+```
+
+**Add Dependencies:**
+```bash
+# Task B depends on Task A (A must complete before B can start)
+bd dep add <task-B-id> <task-A-id>
+```
+
+**Label Convention:**
+- Use labels that fit your project (e.g., `auth`, `api`, `ui`, `testing`)
+- No rigid naming required
 
 ## 5. Final Review & Cross-Agent Integration
 
@@ -284,50 +309,65 @@ For overloaded agents requiring subdivision:
 - Redistribute tasks from overloaded agents to appropriate sub-agents based on logical boundaries and implementation requirements
 - Maintain domain coherence principles from §2.1 and process alignment within sub-domain splits
 
-#### Agent Reassignment File Update
-Update `Implementation_Plan.md` with revised agent assignments:
-- Modify all affected task entries with new sub-agent assignments
-- Preserve exact task content, dependencies, instruction/step definitions, and process specifications during reassignment
-- Ensure file reflects **final agent assignment** before proceeding to §5.2
+#### Agent Reassignment Update
+Update Beads issues with revised agent assignments:
+```bash
+bd update <issue-id> -l <new-domain-label>
+```
+- Preserve exact task content and dependencies during reassignment
+- Ensure issues reflect **final agent assignment** before proceeding to §5.2
 
-### 5.2. Cross-Agent Dependency Marking
-Conduct second holistic review to identify and mark cross-agent dependencies using **final agent assignments** from §5.1:
+### 5.2. Cross-Agent Dependency Verification
+Conduct second holistic review to verify cross-agent dependencies using **final agent assignments** from §5.1:
 
 #### Cross-Agent Dependency Identification
-- Review entire plan with final agent assignments to identify cross-agent dependencies
-- Mark dependencies as cross-agent only if producer and consumer tasks are assigned to different agents
-- Tasks with "Depends on Task X.Y" are cross-agent dependent if Task X.Y's agent ≠ current task's agent
+- Review all issues with final agent assignments to identify cross-agent dependencies
+- Dependencies are cross-agent if producer and consumer tasks have different domain labels
 - Include process dependencies such as quality validation, review checkpoints, or coordination requirements
-- Present all cross-agent dependencies identified **in chat** before proceeding to editing the file 
+- Present all cross-agent dependencies identified **in chat**
 
-#### Dependency Notation File Update
-Update `Implementation_Plan.md` with enhanced dependency notations:
-- Add "by Agent Y" notation exclusively to cross-agent dependencies
-- Preserve simple "Depends on Task X.Y output" format for same-agent dependencies
+#### Dependency Verification
+```bash
+# View all dependencies
+bd list
 
-### 5.3. Conceptual Plan Presentation & User Approval
-Present plan overview and request User approval based on complete file and chat context:
+# Check for circular dependencies
+bd dep cycles
+
+# View what's blocked
+bd blocked
+```
+
+Note: In Beads, dependencies are tracked uniformly via `bd dep add`. Cross-agent context is handled automatically when spawning agents via Task tool.
+
+### 5.3. Plan Presentation & User Approval
+Present plan overview and request User approval:
 
 #### Overview Summary Presentation
-Present **in chat** high-level plan statistics:
-- Number of agents and domains
+Present **in chat** high-level statistics using:
+```bash
+bd stats
+bd list
+bd ready
+```
+
+Summary should include:
+- Number of issues by type and domain
 - Total phases with names and task count
-- Total task count, and total task count per task type
-- Cross-agent dependency count
-- Summary of process requirements and implementation specifications integrated
+- Dependency structure
+- What's ready to start
 
 #### User Review & Approval Process
-- Direct User to review complete structured plan in `Implementation_Plan.md`
+- Show user the Beads output (`bd list`, `bd stats`)
 - Reference detailed breakdown reasoning from previous chat exchanges (§2-§4)
-- Confirm that Context Synthesis insights, including process requirements and quality standards, are reflected in task specifications
-- Handle modification requests through targeted revisions to affected plan sections
-- Iterate until explicit User approval.
+- Confirm that Context Synthesis insights are reflected in issue descriptions
+- Handle modification requests through `bd update` commands
+- Iterate until explicit User approval
 
-#### Next Step Routing:
-Once the plan is approved:
-1. **If User requests Systematic Review:** Proceed to read .apm/guides/Project_Breakdown_Review_Guide.md`.
-2. **If User skips Review:** Proceed directly to **Manager Bootstrap Creation**.
-  - **CRITICAL:** You must generate the Bootstrap Prompt using the **EXACT TEMPLATE** defined in your initiation prompt .claude/commands/apm-1-initiate-setup.md.
-  - **Context Recovery:** If you cannot retrieve the template word-for-word from your context, you must **READ** the .claude/commands/apm-1-initiate-setup.md file to refresh your memory before generating the prompt. Do not approximate the template.
+#### Next Step
+Once the plan is approved, proceed to start the Manager which will:
+1. Query Beads for ready tasks (`bd ready`)
+2. Spawn Implementation Agents via Task tool
+3. Track progress via Beads (`bd update`, `bd comments add`, `bd close`)
 
 **End of Guide**

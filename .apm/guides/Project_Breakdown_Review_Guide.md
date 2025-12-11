@@ -1,12 +1,12 @@
-# APM 0.5.3 - Project Breakdown Review Guide
-This guide defines how Setup Agents conduct targeted, user-selected review of Implementation Plans to detect and fix critical task quality issues before enhancement. Using fresh context from Implementation Plan creation, agents propose specific areas for systematic review and let users choose which sections receive detailed analysis.
+# Project Breakdown Review Guide
+This guide defines how Setup Agents conduct targeted, user-selected review of Beads issues to detect and fix critical task quality issues. Using fresh context from issue creation, agents propose specific areas for systematic review and let users choose which issues receive detailed analysis.
 
 ---
 
 ## 1. Review Protocol Overview
 
 ### Review Purpose
-Conduct systematic review on user-selected portions of the Implementation Plan to identify and fix critical task quality issues:
+Conduct systematic review on user-selected Beads issues to identify and fix critical task quality issues:
 - Task packing violations (multiple distinct activities in one task)
 - Classification errors (wrong single-step vs multi-step designation)
 - Template matching patterns (rigid formatting across tasks)
@@ -30,7 +30,7 @@ Conduct systematic review on user-selected portions of the Implementation Plan t
 ## 2. Intelligent Review Area Proposal
 
 ### 2.1. Context Analysis for Proposal Generation
-**Leverage fresh Implementation Plan creation context to identify high-value review targets:**
+**Leverage fresh Beads issue creation context to identify high-value review targets:**
 
 **Immediate Context Awareness:**
 - **Complex Multi-Step Tasks**: Tasks with 6+ steps that might need splitting
@@ -67,7 +67,7 @@ Conduct systematic review on user-selected portions of the Implementation Plan t
 ```markdown
 ## Systematic Review Recommendations
 
-Based on the Implementation Plan I just created, I recommend systematic review for:
+Based on the Beads issues I just created, I recommend systematic review for:
 
 **High-Complexity Areas:**
 - **[Phase/Task ID]** ([complexity indicators: multi-step count, domain span, etc.])
@@ -269,13 +269,26 @@ Based on the Implementation Plan I just created, I recommend systematic review f
 - Avoid extensive changes to unreviewed sections
 - Focus on applying lessons learned from systematic review
 
-### 5.3. Comprehensive Plan Update
-**Update entire Implementation Plan with all changes:**
+### 5.3. Comprehensive Issue Update
+**Update Beads issues with all changes:**
 
-1. **Apply systematic review fixes** to selected areas
-2. **Apply pattern-based improvements** to unreviewed areas
-3. **Maintain consistency** across entire plan
-4. **Update task numbering** and dependencies as needed
+```bash
+# Update issue description
+bd update <issue-id> --description="Updated description"
+
+# Split task by creating new issues
+bd create --title="Split task part 1" --type=task ...
+bd create --title="Split task part 2" --type=task ...
+bd close <original-id> --reason="Split into multiple issues"
+
+# Update dependencies
+bd dep add <new-consumer> <new-producer>
+```
+
+1. **Apply systematic review fixes** to selected issues
+2. **Apply pattern-based improvements** to unreviewed issues
+3. **Maintain consistency** across all issues
+4. **Update dependencies** as needed
 
 ---
 
@@ -315,22 +328,22 @@ Based on the Implementation Plan I just created, I recommend systematic review f
 ### 6.2. Final Approval Process
 **User review and approval:**
 
-1. **Present updated Implementation Plan** with all changes
+1. **Present updated Beads issues** using `bd list` and `bd stats`
 2. **Highlight major modifications** for user attention
-3. **Request explicit approval** to proceed to Manager Bootstrap Prompt Creation
+3. **Request explicit approval** to proceed
 4. **Address any user concerns** or additional changes
 5. **Confirm completion** when user approves
 
 ---
 
-## 7. Finalization
-**Prepare for Bootstrap Prompt Creation:**
-- Ensure the `Implementation_Plan.md` is in its final, clean state.
-- Confirm all task headers, agent assignments, and dependency tags are formatted correctly.
+## 7. Next Step
 
-**Bootstrap Prompt Generation:**
-- Pass control back to the .claude/commands/apm-1-initiate-setup.md logic.
-- **Context Recovery:** When generating the Bootstrap Prompt, you must use the **EXACT TEMPLATE** from .claude/commands/apm-1-initiate-setup.md. If the template is degraded or missing from your context window, **READ .claude/commands/apm-1-initiate-setup.md** to retrieve it before generating the final artifact.
+After user approves the reviewed issues, they can start the Manager with `/apm-start`.
+
+The Manager will:
+1. Query Beads for ready tasks (`bd ready`)
+2. Spawn Implementation Agents via Task tool
+3. Track progress via Beads
 
 ---
 
