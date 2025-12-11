@@ -15,7 +15,10 @@
       "Bash(bd sync:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(bd ready)"
+      "Bash(bd ready)",
+      "Bash(git config:*)",
+      "Bash(git stash:*)",
+      "Bash(git filter-branch:*)"
     ]
   }
 }

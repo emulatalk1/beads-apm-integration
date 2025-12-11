@@ -1,8 +1,8 @@
-# Beads + APM Integration Design Document
+# Beads + APM Integration
 
 ## Overview
 
-This document defines how to integrate **Beads** (issue tracking) with **APM** (Agentic Project Management) to solve key workflow problems.
+This document describes the integration of **Beads** (issue tracking) with **APM** (Agentic Project Management) methodology.
 
 ---
 
@@ -560,62 +560,7 @@ bd comments manager-notes
 
 ---
 
-## Implementation Plan
-
-### Phase 1: Foundation
-
-1. **Define Beads conventions**
-   - Issue description format for tasks
-   - Label scheme for agent assignments
-   - Manager-notes issue convention
-
-2. **Create helper commands** (optional)
-   - `/assign-task <id>` - Spawn agent for task
-   - `/project-status` - Summary view
-
-### Phase 2: Modified APM Guides
-
-3. **Update Setup flow**
-   - Create Beads issues instead of Implementation_Plan.md
-   - Validation via `bd dep cycles`, `bd ready`
-
-4. **Update Manager workflow**
-   - Query Beads for state
-   - Use Task tool for assignments
-   - Simplified handover prompt
-
-5. **Update Implementation workflow**
-   - Save progress via `bd comments`
-   - Use Task tool for delegation
-   - Simplified handover prompt
-
-### Phase 3: Testing
-
-6. **Test on small project**
-   - Run through full workflow
-   - Identify gaps
-
-7. **Iterate and refine**
-   - Adjust conventions
-   - Update documentation
-
----
-
-## Open Questions
-
-1. **Implementation_Plan.md** - Keep as read-only reference, or eliminate entirely?
-
-2. **Rich task specs** - Is Beads description field sufficient, or need structured format?
-
-3. **Epic hierarchy** - Use Beads parent-child, or just dependencies?
-
-4. **Agent labels** - Single label per task, or multiple allowed?
-
-5. **History retention** - How much detail in comments? Guidelines needed?
-
----
-
-## Appendix: Example Project Setup
+## Example: Project Setup
 
 ```bash
 # Create phase epics
@@ -655,4 +600,4 @@ bd dep cycles
 
 | Date | Author | Changes |
 |------|--------|---------|
-| 2025-12-11 | Claude + User | Initial draft from discussion |
+| 2025-12-11 | Claude + User | Initial design and implementation |

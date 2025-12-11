@@ -1,26 +1,40 @@
-# Beads + APM Integration Project
+# Beads + APM Integration
 
-This project develops standalone tooling to integrate Beads issue tracking with APM (Agentic Project Management) framework.
+Integration of Beads issue tracking with APM (Agentic Project Management) methodology.
 
-## Goal
+## What This Is
 
-Replace APM's markdown-based state management with Beads, and use Claude Code's Task tool for agent spawning instead of copy-paste.
+A ready-to-use kit that replaces APM's markdown-based state management with Beads, and uses Claude Code's Task tool for agent spawning.
 
-## Key Components to Build
+## Quick Start
 
-1. **Beads conventions** - Issue structure, labels, description format for APM-style tasks
-2. **Slash commands** - `/assign-task`, `/project-status` for streamlined workflow
-3. **Modified APM guides** - Updated for Beads integration
-4. **Example workflows** - Demonstrate the full lifecycle
+1. **Setup a new project**: Run `/apm-setup`
+2. **Start work**: Run `/apm-start`
 
-## Reference
+## Project Structure
 
-See `BEADS_APM_INTEGRATION.md` for the complete design document.
+```
+.apm/guides/           # APM methodology guides (adjusted for Beads)
+  Context_Synthesis_Guide.md
+  Project_Breakdown_Guide.md
+  Project_Breakdown_Review_Guide.md
+  Task_Assignment_Guide.md
+  Agent_Workflow_Guide.md
+
+.claude/commands/      # Slash commands
+  apm-setup.md         # Initialize project with Beads
+  apm-start.md         # Resume or start work
+```
 
 ## Beads Workflow
 
 - Track ALL work in beads (no TodoWrite, no markdown TODOs)
-- Use `bd create` to create issues
-- Use `bd update --status=in_progress` when starting work
-- Use `bd comments add` to log progress
-- Use `bd close` when done
+- `bd create` - Create issues
+- `bd update --status=in_progress` - Start work
+- `bd comments add` - Log progress
+- `bd close` - Complete work
+- `bd ready` - Find available work
+
+## Reference
+
+See `BEADS_APM_INTEGRATION.md` for the complete design document.
