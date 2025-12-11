@@ -94,7 +94,17 @@ detect_claude_md() {
 install_beads() {
     echo -e "${YELLOW}Installing Beads...${NC}"
     cd "$TARGET_DIR"
-    npx @beads/bd init
+
+    # Check if bd is already installed globally
+    if command -v bd &> /dev/null; then
+        echo -e "  Using existing bd installation"
+        bd init
+    else
+        echo -e "  Installing @beads/bd globally..."
+        npm install -g @beads/bd
+        bd init
+    fi
+
     echo -e "${GREEN}✓ Beads initialized${NC}"
 }
 
