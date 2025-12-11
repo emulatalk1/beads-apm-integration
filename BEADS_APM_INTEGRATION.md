@@ -23,35 +23,35 @@ This document describes the integration of **Beads** (issue tracking) with **APM
 
 ### Separation of Concerns
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   BEADS (Data Layer)                        │
-│                                                             │
-│  • Single source of truth for tasks                         │
-│  • Status, dependencies, comments                           │
-│  • Persistent across sessions (git-tracked)                 │
-│  • Queryable (bd ready, bd blocked, bd list)                │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│              TASK TOOL (Execution Layer)                    │
-│                                                             │
-│  • Spawn agents directly (no copy-paste)                    │
-│  • Manager spawns Implementation Agents                     │
-│  • Implementation spawns Ad-Hoc Agents                      │
-│  • Results return directly to caller                        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│               APM GUIDES (Methodology Layer)                │
-│                                                             │
-│  • Context Synthesis process                                │
-│  • Task breakdown methodology                               │
-│  • Agent role definitions                                   │
-│  • Quality standards                                        │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph BEADS["BEADS (Data Layer)"]
+        B1["Single source of truth for tasks"]
+        B2["Status, dependencies, comments"]
+        B3["Persistent across sessions (git-tracked)"]
+        B4["Queryable (bd ready, bd blocked, bd list)"]
+    end
+
+    subgraph TASK["TASK TOOL (Execution Layer)"]
+        T1["Spawn agents directly (no copy-paste)"]
+        T2["Manager spawns Implementation Agents"]
+        T3["Implementation spawns Ad-Hoc Agents"]
+        T4["Results return directly to caller"]
+    end
+
+    subgraph APM["APM GUIDES (Methodology Layer)"]
+        A1["Context Synthesis process"]
+        A2["Task breakdown methodology"]
+        A3["Agent role definitions"]
+        A4["Quality standards"]
+    end
+
+    BEADS --> TASK
+    TASK --> APM
+
+    style BEADS fill:#e1f5ff,stroke:#0288d1,stroke-width:2px
+    style TASK fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style APM fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
 ```
 
 ### Core Principle
@@ -59,6 +59,25 @@ This document describes the integration of **Beads** (issue tracking) with **APM
 - **Beads** = Where data lives (tasks, status, history)
 - **Task Tool** = How agents spawn other agents
 - **APM Guides** = How to think about work (methodology only)
+
+### Guide Files Reference
+
+The `.apm/guides/` directory contains detailed methodology guides for each workflow phase:
+
+| Guide | Purpose | Used By |
+|-------|---------|---------|
+| **Context_Synthesis_Guide.md** | Four-round requirements gathering methodology | Setup Agent (during /apm-setup) |
+| **Project_Breakdown_Guide.md** | Transform requirements into Beads issues | Setup Agent (during /apm-setup) |
+| **Project_Breakdown_Review_Guide.md** | Optional systematic task quality review | Setup Agent (user-selected) |
+| **Agent_Discovery_Guide.md** | Discover and select appropriate agents | Setup Agent & Manager Agent |
+| **Task_Assignment_Guide.md** | Dependency context and agent spawning details | Manager Agent |
+| **Agent_Workflow_Guide.md** | Day-to-day Beads and Task tool usage | Manager & Implementation Agents |
+
+**Quick Navigation:**
+- Setting up a project? → Start with Context_Synthesis_Guide.md
+- Breaking down work? → See Project_Breakdown_Guide.md
+- Assigning tasks? → Reference Agent_Discovery_Guide.md + Task_Assignment_Guide.md
+- Daily workflow? → Use Agent_Workflow_Guide.md
 
 ---
 
@@ -78,14 +97,17 @@ This document describes the integration of **Beads** (issue tracking) with **APM
 
 ### What APM Keeps
 
-| APM Component | Purpose | Status |
-|---------------|---------|--------|
-| Context_Synthesis_Guide | How to gather requirements | Keep |
-| Project_Breakdown_Guide | How to decompose work | Keep |
-| Task_Assignment_Guide | What makes good task specs | Keep (modify for Beads) |
-| Memory_Log_Guide | How to document work | Replace with Beads conventions |
-| Memory_System_Guide | How memory is organized | Replace with Beads conventions |
-| Agent role definitions | Who does what | Keep |
+| APM Component | Purpose | Status | See Guide |
+|---------------|---------|--------|-----------|
+| Context_Synthesis_Guide | How to gather requirements | Keep | `.apm/guides/Context_Synthesis_Guide.md` |
+| Project_Breakdown_Guide | How to decompose work | Keep | `.apm/guides/Project_Breakdown_Guide.md` |
+| Project_Breakdown_Review_Guide | Optional systematic review | Keep | `.apm/guides/Project_Breakdown_Review_Guide.md` |
+| Task_Assignment_Guide | What makes good task specs | Keep (modify for Beads) | `.apm/guides/Task_Assignment_Guide.md` |
+| Agent_Discovery_Guide | Agent selection framework | Keep | `.apm/guides/Agent_Discovery_Guide.md` |
+| Agent_Workflow_Guide | Day-to-day operations | Keep | `.apm/guides/Agent_Workflow_Guide.md` |
+| Memory_Log_Guide | How to document work | Replace with Beads conventions | (See Agent_Workflow_Guide.md) |
+| Memory_System_Guide | How memory is organized | Replace with Beads conventions | (See Agent_Workflow_Guide.md) |
+| Agent role definitions | Who does what | Keep | (See all guides) |
 
 ---
 
@@ -101,23 +123,57 @@ This document describes the integration of **Beads** (issue tracking) with **APM
 | `bug` | Bug fix task | Defect repair |
 | `chore` | Meta/admin | Coordination notes, cleanup |
 
-### Labels for Agent Assignment
+### Agent Assignment via Assignee Field
+
+Agent assignment uses the `--assignee` (`-a`) field in Beads (see `Agent_Discovery_Guide.md` for complete agent selection framework):
 
 ```bash
-# Agent domain labels
-Agent_Frontend
-Agent_Backend
-Agent_API
-Agent_Testing
-Agent_Dependencies
+# Built-in agents (always available)
+-a general-purpose   # Implementation tasks (write/edit/bash access)
+-a explore          # Quick codebase exploration (fast, read-only)
+-a plan             # Research & planning (read-only + web search)
+
+# Custom agents (if defined in .claude/agents/)
+-a database-specialist
+-a frontend-specialist
+```
+
+**Complete Agent Selection Framework:**
+
+See `Agent_Discovery_Guide.md` for:
+- Full decision framework for matching tasks to agents
+- Custom agent discovery process (`find .claude/agents`)
+- Agent capability matrices and use cases
+- Manager and Setup Agent usage patterns
+
+**Quick Decision Tree:**
+1. Does task modify the system? → `general-purpose` or custom implementation agent
+2. Does task require planning/research with web access? → `plan`
+3. Is this quick read-only exploration? → `explore`
+4. Is there a matching custom agent? → Use custom agent (discover via Agent_Discovery_Guide.md)
+
+**Detailed guidance:** See `Agent_Discovery_Guide.md` §2 "Agent Selection Guidance"
+
+### Labels for Domain Categorization
+
+Use labels for logical domain grouping (flexible naming):
+
+```bash
+# Domain labels (examples - adapt to your project)
+auth              # Authentication/authorization work
+api               # Backend API development
+ui                # Frontend user interface
+testing           # Test development
+database          # Database migrations/schema
+dependencies      # Dependency management
 
 # Meta labels
 manager-meta      # Manager coordination notes
-ad-hoc-research   # Research delegation
-ad-hoc-debug      # Debug delegation
 has-findings      # Task has important discoveries
 blocked-external  # Blocked by external factor
 ```
+
+**Key Principle:** Assignee = who does the work. Labels = categorization.
 
 ### Issue Description Format
 
@@ -166,7 +222,30 @@ bd blocked
 ### New Setup with Beads
 
 ```
-1. Context Synthesis (unchanged - Q&A)
+1. Context Synthesis → Four-Round Discovery Methodology
+        │
+        ├─ Question Round 1 (iterative): Existing Material and Vision
+        │    • User's deliverable type and existing materials
+        │    • Current plan, vision, and important files
+        │    • Iterative follow-ups until understanding complete
+        │
+        ├─ Question Round 2 (iterative): Targeted Inquiry
+        │    • Project purpose, scope, and essential features
+        │    • Work structure, dependencies, challenging aspects
+        │    • Technical constraints, environment requirements
+        │    • Iterative follow-ups until understanding complete
+        │
+        ├─ Question Round 3 (iterative): Requirements & Process Gathering
+        │    • Workflow patterns and quality standards
+        │    • Technical constraints and implementation preferences
+        │    • Coordination requirements and review processes
+        │    • Iterative follow-ups until understanding complete
+        │
+        └─ Question Round 4: Final Validation
+             • Comprehensive summary presentation to user
+             • User approval or corrections required before proceeding
+        │
+        [See Context_Synthesis_Guide.md for complete methodology]
         │
         ▼
 2. Project Breakdown → Create Beads Structure
@@ -194,6 +273,30 @@ bd blocked
         └─ bd stats          (review structure)
         │
         ▼
+3a. Optional: Systematic Review (user-selected)
+        │
+        ├─ Agent proposes review areas based on:
+        │    • High-complexity tasks (6+ steps, multi-domain)
+        │    • Critical path items with multiple dependencies
+        │    • User requirement integration points
+        │    • Pattern concerns (template matching indicators)
+        │
+        ├─ User selects which phases/tasks to review:
+        │    • Full phase selection
+        │    • Individual task selection
+        │    • Mixed combinations
+        │
+        ├─ Systematic analysis applied to selected areas:
+        │    • Task packing violations
+        │    • Classification errors (single-step vs multi-step)
+        │    • Missing user requirements
+        │    • Template matching patterns
+        │
+        └─ Pattern-based improvements to unreviewed areas
+        │
+        [See Project_Breakdown_Review_Guide.md for complete methodology]
+        │
+        ▼
 4. Manager Bootstrap (simplified)
         │
         └─ Short prompt: "Query Beads for state, use Task tool to assign"
@@ -217,33 +320,35 @@ bd blocked
 
 ### Task Assignment Flow
 
-```
-1. Manager identifies next task
-   $ bd ready
+```mermaid
+sequenceDiagram
+    participant M as Manager Agent
+    participant B as Beads
+    participant I as Implementation Agent
 
-2. Manager gets task details
-   $ bd show <task-id>
+    M->>B: 1. bd ready
+    B-->>M: Available tasks
 
-3. Manager spawns Implementation Agent
-   Task(
-     subagent_type="general-purpose",
-     prompt="""
-     You are Implementation Agent for [domain].
+    M->>B: 2. bd show &lt;task-id&gt;
+    B-->>M: Task details & dependencies
 
-     Task: [from bd show]
+    Note over M: 3. Prepare task prompt<br/>with dependency context
 
-     When working:
-     - bd update <id> --status=in_progress
-     - bd comments add <id> "progress notes"
+    M->>I: Task tool spawn<br/>subagent_type="general-purpose"<br/>prompt with task details
 
-     When done:
-     - bd close <id> --reason="completion summary"
-     """
-   )
+    Note over I: Agent starts work
 
-4. Agent completes, Manager reviews
-   $ bd show <task-id>
-   $ bd comments <task-id>
+    I->>B: bd update &lt;id&gt; --status=in_progress
+    I->>B: bd comments add &lt;id&gt; "progress notes"
+    I->>B: bd close &lt;id&gt; --reason="summary"
+
+    I-->>M: 4. Results return directly
+
+    M->>B: bd show &lt;task-id&gt;
+    B-->>M: Verify completion
+
+    M->>B: bd comments &lt;task-id&gt;
+    B-->>M: Review work history
 ```
 
 ### Manager Handover
@@ -423,56 +528,57 @@ bd comments add task-xxx "Research complete: Using SecurityFilterChain approach"
 
 ### APM (Before)
 
-```
-┌─────────────────────────────────────────┐
-│ Agent works                             │
-│ (state in context memory)               │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────┐
-│ Context fills up                        │
-│                                         │
-│ Agent WRITES handover document:         │
-│ - Manually synthesize state             │
-│ - 100+ lines                            │
-│ - Can be wrong/incomplete               │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────┐
-│ New agent READS handover document       │
-│ (may not match reality)                 │
-└─────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Agent works<br/>(state in context memory)"]
+    B["Context fills up"]
+    C["Agent WRITES handover document:<br/>• Manually synthesize state<br/>• 100+ lines<br/>• Can be wrong/incomplete"]
+    D["New agent READS handover<br/>(may not match reality)"]
+
+    A --> B
+    B --> C
+    C --> D
+
+    style A fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style B fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style C fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px
+    style D fill:#ffebee,stroke:#c62828,stroke-width:2px
+
+    Note1["⚠️ PAIN POINT:<br/>Manual synthesis<br/>Risk of drift"]
+    Note1 -.-> C
+
+    style Note1 fill:#ff5252,stroke:#b71c1c,stroke-width:2px,color:#fff
 ```
 
 ### Beads (After)
 
-```
-┌─────────────────────────────────────────┐
-│ Agent works                             │
-│                                         │
-│ SAVES state continuously:               │
-│ - bd update (status)                    │
-│ - bd comments (progress)                │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────┐
-│ Context fills up                        │
-│                                         │
-│ Nothing to write                        │
-│ (state already in Beads)                │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────┐
-│ New agent QUERIES Beads:                │
-│ - bd list (what's active)              │
-│ - bd show (task details)                │
-│ - bd comments (work history)            │
-│ (always accurate)                       │
-└─────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["Agent works"]
+    B["SAVES state continuously:<br/>• bd update (status)<br/>• bd comments (progress)"]
+    C["Context fills up"]
+    D["Nothing to write<br/>(state already in Beads)"]
+    E["New agent QUERIES Beads:<br/>• bd list (what's active)<br/>• bd show (task details)<br/>• bd comments (work history)<br/>(always accurate)"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style D fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style E fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px
+
+    Note1["✓ BENEFIT:<br/>Continuous save<br/>Always accurate"]
+    Note1 -.-> B
+
+    Note2["✓ NO MANUAL<br/>HANDOVER"]
+    Note2 -.-> D
+
+    style Note1 fill:#4caf50,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style Note2 fill:#66bb6a,stroke:#2e7d32,stroke-width:2px,color:#fff
 ```
 
 ### Key Difference
