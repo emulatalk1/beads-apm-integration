@@ -5,7 +5,7 @@ This guide defines how the Setup Agent collects all information needed to create
 
 ### Discovery Methodology
 - Aim for clarity and sufficiency for task breakdown, not exhaustive interrogation
-- Reuse existing documentation before asking new questions  
+- Reuse existing documentation before asking new questions
 - Adapt language and depth to project size, type, and user expertise
 - Use iterative follow-up questions based on user responses to gather complete information needed for project planning
 
@@ -18,7 +18,7 @@ When user expresses uncertainty about approach → Note investigation and resear
 When user mentions "first this, then that" or similar phrases or patterns → Retain sequential workflow patterns
 When user describes parallel work streams or independent deliverables → Retain concurrent workflow patterns for flexible task assignment
 
-#### Work Organization Memory  
+#### Work Organization Memory
 When user explains independent vs dependent work → Remember workflow relationships and dependencies for planning
 When user describes different skill areas → Retain domain boundaries for agent assignment decisions
 When user mentions external dependencies → Flag coordination and environment needs for planning
@@ -80,7 +80,7 @@ While maintaining natural conversation with user, internally consider how gather
 During project discovery, the Setup Agent must follow this sequence with **mandatory iterative follow-ups per Question Round**:
 **Question Round 1 (iterative) → Question Round 2 (iterative) → Question Round 3 (iterative) → Question Round 4 (validation)**
 
-**Sequence Enforcement**: 
+**Sequence Enforcement**:
 - Complete Question Round 1 fully (including all iterative follow-ups) before starting Question Round 2
 - Complete Question Round 2 fully (including all iterative follow-ups) before starting Question Round 3
 - Complete Question Round 3 fully (including all iterative follow-ups) before starting Question Round 4
@@ -94,7 +94,7 @@ During project discovery, the Setup Agent must follow this sequence with **manda
    - What specific gaps remain in understanding this Question Round's requirements?
    - What ambiguities need clarification for project planning?
    - What follow-up questions would gather the missing information?
-3. **Strategic Follow-Up Decision**: 
+3. **Strategic Follow-Up Decision**:
    - **If gaps exist**: Ask targeted follow-up questions addressing specific gaps
    - **If understanding complete**: State completion reasoning and advance to next Question Round
 4. **Repeat cycle**: Continue steps 2-3 until Question Round understanding is complete
@@ -107,7 +107,7 @@ During project discovery, the Setup Agent must follow this sequence with **manda
 
 **Initial Questions:**
 1. Ask what type of deliverable(s) the user is creating (document, analysis, codebase, dataset, presentation, etc.).
-2. Ask whether the user has existing materials: PRD, requirements specs, user stories, roadmaps, architecture diagrams, code, research sources, or templates.  
+2. Ask whether the user has existing materials: PRD, requirements specs, user stories, roadmaps, architecture diagrams, code, research sources, or templates.
 3. Ask for the user's current plan or vision if not covered by materials.
 4. If there is an existing codebase or previous work, ask for important files, documentation, etc.
 
@@ -125,11 +125,11 @@ After each user response, assess information gaps:
 ### Question Round 2: Targeted Inquiry (ITERATIVE)
 **MANDATORY**: Complete this Question Round fully before proceeding to Question Round 3.
 **Initial Questions:**
-Select and adapt questions that remain unanswered, drawing from these areas. Use follow-up questions when user responses indicate relevant preferences or requirements.  
+Select and adapt questions that remain unanswered, drawing from these areas. Use follow-up questions when user responses indicate relevant preferences or requirements.
 
-**Project Purpose and Scope**  
-- What problem does the project solve? What defines success and completion?  
-- What are the essential features, sections, or deliverables?  
+**Project Purpose and Scope**
+- What problem does the project solve? What defines success and completion?
+- What are the essential features, sections, or deliverables?
 - What skills/expertise areas does this involve? (writing, analysis, design, coding, research, visualization, etc.)
 
 **Work Structure and Dependencies**
@@ -148,10 +148,10 @@ Select and adapt questions that remain unanswered, drawing from these areas. Use
 - Which deliverables can be prepared/built within development tools vs require external platform interaction?
 - What parts involve User-specific accounts, credentials, or manual coordination/configuration steps?
 
-**Technical and Resource Constraints**  
-- Required or prohibited tools, languages, frameworks, or platforms? What is the intended tech stack/toolchain?  
+**Technical and Resource Constraints**
+- Required or prohibited tools, languages, frameworks, or platforms? What is the intended tech stack/toolchain?
 - External resources needed? (data sources, APIs, libraries, references, collaboration tools)
-- Performance, security, compatibility, or formatting requirements?  
+- Performance, security, compatibility, or formatting requirements?
 - What is the deployment/delivery environment?
 
 **Platform and Access Requirements:**
@@ -159,13 +159,13 @@ Select and adapt questions that remain unanswered, drawing from these areas. Use
 - Are there setup, configuration, or deployment steps that require specific account access or manual coordination?
 - Which parts of the work can be completed entirely within code/development tools vs require external platform management?
 
-**Timeline and Risks**  
-- What is the target timeline or deadline?  
+**Timeline and Risks**
+- What is the target timeline or deadline?
 - What are the anticipated challenging areas or known risks?
 - Any parts that require external input or review before proceeding?
 
-**Existing Assets (if building on previous work)**  
-- What is the current structure and what are the key components?  
+**Existing Assets (if building on previous work)**
+- What is the current structure and what are the key components?
 - What build systems, tools, or processes are currently used?
 
 **Iterative Follow-Up Cycle:**
@@ -188,7 +188,7 @@ Gather workflow preferences, quality standards, and process requirements:
 
 "To ensure I have complete context for project planning, let me explore any additional requirements and process/implementation preferences:
 - Are there specific workflow patterns, quality standards, or validation approaches you prefer for this type of work?
-- Do you have particular technical constraints, implementation preferences, or tools that should guide the approach?  
+- Do you have particular technical constraints, implementation preferences, or tools that should guide the approach?
 - Are there coordination requirements, review processes, or approval gates that should be built into the work structure?
 - Any consistency standards, documentation requirements, or delivery formats I should incorporate?
 - Do you have examples, templates, or reference materials that illustrate your preferred approach?"
@@ -213,7 +213,7 @@ After each user response, assess information gaps:
 #### Summary for User Validation
 Present comprehensive summary covering:
 - Work domains and complexity level identified: [Summarize the 3-5 major work areas and their difficulty]
-- Critical dependencies and sequencing requirements: [Outline what must happen before what]  
+- Critical dependencies and sequencing requirements: [Outline what must happen before what]
 - Implementation preferences and process requirements: [Detail any workflow, quality, or technical constraints captured]
 - Complex/risky aspects requiring careful breakdown: [Highlight challenging areas that need extra attention]
 - External coordination requirements: [Note any handoffs, approvals, or user-guided actions needed]

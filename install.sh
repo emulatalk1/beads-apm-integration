@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Beads + APM Integration Installer
+# Beads + APM Integration Installer v0.2.0
 # Installs APM methodology with Beads issue tracking into your project
 # Fetches templates from GitHub
 
 set -e
+
+VERSION="0.2.0"
 
 # Colors for output
 RED='\033[0;31m'
@@ -23,7 +25,7 @@ TARGET_DIR="${1:-.}"
 TARGET_DIR="$(cd "$TARGET_DIR" 2>/dev/null && pwd)" || TARGET_DIR="$1"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║           Beads + APM Integration Installer                ║${NC}"
+echo -e "${BLUE}║      Beads + APM Integration Installer v${VERSION}            ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -97,9 +99,42 @@ detect_claude_md() {
     return 1
 }
 
+# Detect v0.1.0 installation
+detect_v0_1_0() {
+    if [ -f "$TARGET_DIR/.apm/metadata.json" ]; then
+        if grep -q '"version":\s*"0\.1\.0"' "$TARGET_DIR/.apm/metadata.json" 2>/dev/null; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
 # ============================================================================
 # Installation Functions
 # ============================================================================
+
+remove_v0_1_0() {
+    echo -e "${YELLOW}Removing v0.1.0 installation...${NC}"
+
+    # Remove .apm directory (no backup - this is an upgrade)
+    if [ -d "$TARGET_DIR/.apm" ]; then
+        echo -e "  Removing .apm directory..."
+        rm -rf "$TARGET_DIR/.apm"
+    fi
+
+    # Remove apm-setup.md and apm-start.md commands
+    if [ -f "$TARGET_DIR/.claude/commands/apm-setup.md" ]; then
+        echo -e "  Removing apm-setup.md..."
+        rm -f "$TARGET_DIR/.claude/commands/apm-setup.md"
+    fi
+
+    if [ -f "$TARGET_DIR/.claude/commands/apm-start.md" ]; then
+        echo -e "  Removing apm-start.md..."
+        rm -f "$TARGET_DIR/.claude/commands/apm-start.md"
+    fi
+
+    echo -e "${GREEN}✓ v0.1.0 removed${NC}"
+}
 
 install_beads() {
     echo -e "${YELLOW}Installing Beads...${NC}"
@@ -122,7 +157,7 @@ install_apm_guides() {
     echo -e "${YELLOW}Installing APM guides from GitHub...${NC}"
     mkdir -p "$TARGET_DIR/.apm/guides"
 
-    # Download all guide files
+    # Download all guide files from dev/
     local guides=(
         "Context_Synthesis_Guide.md"
         "Project_Breakdown_Guide.md"
@@ -133,12 +168,12 @@ install_apm_guides() {
 
     for guide in "${guides[@]}"; do
         echo -e "  Downloading ${guide}..."
-        download_file ".apm/guides/${guide}" "$TARGET_DIR/.apm/guides/${guide}"
+        download_file "dev/.apm/guides/${guide}" "$TARGET_DIR/.apm/guides/${guide}"
     done
 
     # Download metadata
     echo -e "  Downloading metadata.json..."
-    download_file ".apm/metadata.json" "$TARGET_DIR/.apm/metadata.json"
+    download_file "dev/.apm/metadata.json" "$TARGET_DIR/.apm/metadata.json"
 
     echo -e "${GREEN}✓ APM guides installed${NC}"
 }
@@ -147,12 +182,12 @@ install_claude_commands() {
     echo -e "${YELLOW}Installing Claude commands from GitHub...${NC}"
     mkdir -p "$TARGET_DIR/.claude/commands"
 
-    # Download command files
+    # Download command files from dev/
     echo -e "  Downloading apm-setup.md..."
-    download_file ".claude/commands/apm-setup.md" "$TARGET_DIR/.claude/commands/apm-setup.md"
+    download_file "dev/.claude/commands/apm-setup.md" "$TARGET_DIR/.claude/commands/apm-setup.md"
 
     echo -e "  Downloading apm-start.md..."
-    download_file ".claude/commands/apm-start.md" "$TARGET_DIR/.claude/commands/apm-start.md"
+    download_file "dev/.claude/commands/apm-start.md" "$TARGET_DIR/.claude/commands/apm-start.md"
 
     echo -e "${GREEN}✓ Claude commands installed${NC}"
 }
@@ -238,6 +273,7 @@ HAS_APM=false
 HAS_BEADS_APM=false
 HAS_CLAUDE_COMMANDS=false
 HAS_CLAUDE_MD=false
+HAS_V0_1_0=false
 
 if detect_git; then
     HAS_GIT=true
@@ -279,10 +315,18 @@ else
     echo -e "  ${YELLOW}○${NC} No CLAUDE.md"
 fi
 
+if detect_v0_1_0; then
+    HAS_V0_1_0=true
+    echo -e "  ${YELLOW}!${NC} v0.1.0 detected (will upgrade to v0.2.0)"
+fi
+
 echo ""
 
 # Determine installation type
-if ! $HAS_GIT && ! $HAS_BEADS && ! $HAS_APM; then
+if $HAS_V0_1_0; then
+    INSTALL_TYPE="upgrade_v0_1_0"
+    echo -e "${BLUE}Installation type:${NC} Upgrade from v0.1.0 to v0.2.0"
+elif ! $HAS_GIT && ! $HAS_BEADS && ! $HAS_APM; then
     INSTALL_TYPE="new"
     echo -e "${BLUE}Installation type:${NC} New project"
 elif $HAS_APM && $HAS_BEADS_APM && $HAS_BEADS; then
@@ -325,6 +369,33 @@ echo ""
 # ============================================================================
 
 case $INSTALL_TYPE in
+    "upgrade_v0_1_0")
+        echo -e "${BLUE}Upgrading from v0.1.0 to v0.2.0...${NC}"
+        echo ""
+
+        # Remove old v0.1.0 files
+        remove_v0_1_0
+
+        # Install v0.2.0 from dev/
+        echo ""
+        echo -e "${BLUE}Installing v0.2.0...${NC}"
+        install_apm_guides
+        install_claude_commands
+
+        # Update CLAUDE.md if needed
+        if ! grep -q "## APM Integration" "$TARGET_DIR/CLAUDE.md" 2>/dev/null; then
+            if $HAS_CLAUDE_MD; then
+                append_to_claude_md
+            else
+                install_claude_md
+            fi
+        fi
+
+        echo ""
+        echo -e "${GREEN}Upgrade complete!${NC}"
+        echo -e "${BLUE}Upgraded from v0.1.0 to v0.2.0${NC}"
+        ;;
+
     "new")
         echo -e "${BLUE}Setting up new project...${NC}"
         echo ""

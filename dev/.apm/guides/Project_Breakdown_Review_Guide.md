@@ -247,48 +247,112 @@ Based on the Beads issues I just created, I recommend systematic review for:
 ## 5. Comprehensive Fixing & Pattern Application
 
 ### 5.1. Selected Area Fixes
-**Apply all identified fixes to selected tasks:**
+**Apply all identified fixes to selected tasks via Beads updates:**
 
-- Fix packing violations through task splitting
-- Correct classification errors
-- Add missing user requirements
-- Resolve template matching issues
-- Clarify execution scope boundaries
+**Fix Types and Beads Operations:**
+
+**Task Splitting (Packing Violations):**
+```bash
+# Create new split tasks
+bd create --title="[Original Task] - Part 1: [Focused Scope]" \
+  --type=task \
+  --description="[First component details]" \
+  --effort="[time estimate]"
+
+bd create --title="[Original Task] - Part 2: [Focused Scope]" \
+  --type=task \
+  --description="[Second component details]" \
+  --effort="[time estimate]"
+
+# Update dependencies if needed
+bd dep add <new-task-1> <predecessor-task>
+bd dep add <new-task-2> <new-task-1>
+bd dep add <successor-task> <new-task-2>
+
+# Close original packed task
+bd close <original-task-id> --reason="Split into focused tasks [new-task-1] and [new-task-2] to address packing violation"
+```
+
+**Classification Corrections:**
+```bash
+# Update task description to reflect correct classification
+bd update <task-id> --description="[Updated description with correct format and validation points]"
+
+# Add comments to document classification change reasoning
+bd comments add <task-id> "REVIEW: Changed classification from [old] to [new] because [specific reasoning]"
+```
+
+**Requirement Integration:**
+```bash
+# Update task to include missing Context Synthesis requirements
+bd update <task-id> --description="[Enhanced description with explicit user requirements]"
+
+# Document requirement additions
+bd comments add <task-id> "REVIEW: Added Context Synthesis requirements: [list of requirements integrated]"
+```
+
+**Template Matching Resolution:**
+```bash
+# Update task descriptions to vary formatting appropriately
+bd update <task-id> --description="[Revised description with task-specific formatting]"
+
+# Note pattern fix
+bd comments add <task-id> "REVIEW: Revised formatting to match task-specific needs rather than template pattern"
+```
+
+**Execution Scope Clarification:**
+```bash
+# Clarify boundaries and external coordination
+bd update <task-id> --description="[Enhanced description with clear scope boundaries and user coordination steps]"
+
+# Document scope refinements
+bd comments add <task-id> "REVIEW: Clarified execution scope - [specific boundary clarifications made]"
+```
 
 ### 5.2. Pattern Application to Unreviewed Areas
 **Apply learned patterns to improve entire plan:**
 
 **If Pattern Found in Selected Areas:**
-- **Packing patterns**: Scan unreviewed areas for similar packing indicators
-- **Classification patterns**: Check unreviewed tasks with similar characteristics
-- **Template matching**: Vary formatting across unreviewed similar tasks
-- **Missing requirements**: Add requirements to unreviewed tasks in similar domains
+- **Packing patterns**: Scan unreviewed areas for similar packing indicators, apply `bd create` splits where applicable
+- **Classification patterns**: Check unreviewed tasks with similar characteristics, apply `bd update` corrections
+- **Template matching**: Vary formatting across unreviewed similar tasks via `bd update`
+- **Missing requirements**: Add requirements to unreviewed tasks in similar domains using `bd update`
 
 **Conservative Application:**
 - Apply only clear, obvious patterns to unreviewed areas
 - Avoid extensive changes to unreviewed sections
 - Focus on applying lessons learned from systematic review
+- Document pattern-based changes with `bd comments add`
 
-### 5.3. Comprehensive Issue Update
-**Update Beads issues with all changes:**
-
+**Pattern-Based Update Example:**
 ```bash
-# Update issue description
-bd update <issue-id> --description="Updated description"
+# Apply identified pattern to similar unreviewed task
+bd update <unreviewed-task-id> --description="[Updated with pattern-based improvement]"
 
-# Split task by creating new issues
-bd create --title="Split task part 1" --type=task ...
-bd create --title="Split task part 2" --type=task ...
-bd close <original-id> --reason="Split into multiple issues"
-
-# Update dependencies
-bd dep add <new-consumer> <new-producer>
+# Document pattern application
+bd comments add <unreviewed-task-id> "PATTERN FIX: Applied [pattern type] improvement identified during systematic review of [reviewed-task-id]"
 ```
 
-1. **Apply systematic review fixes** to selected issues
-2. **Apply pattern-based improvements** to unreviewed issues
-3. **Maintain consistency** across all issues
-4. **Update dependencies** as needed
+### 5.3. Comprehensive Update Summary
+**Track all Beads modifications made during review:**
+
+**Update Operations Applied:**
+1. **Systematic review fixes** to selected issues via `bd update`, `bd create` (splits), `bd close`
+2. **Pattern-based improvements** to unreviewed issues via `bd update`
+3. **Dependency updates** via `bd dep add/remove` to maintain consistency
+4. **Documentation comments** via `bd comments add` for audit trail
+
+**Verification Steps:**
+```bash
+# Verify all updates applied
+bd list --status=ready
+
+# Check dependency integrity
+bd deps <task-id>
+
+# Review recent changes
+bd activity --since="[review start time]"
+```
 
 ---
 
@@ -306,6 +370,13 @@ bd dep add <new-consumer> <new-producer>
 - [Individual tasks] - Found and fixed: [specific issues]
 - [Any areas with no issues found]
 
+**Beads Operations Performed:**
+- Created [X] new issues (task splits)
+- Updated [X] issue descriptions (classification, requirements, scope)
+- Closed [X] original issues (replaced by splits)
+- Added [X] dependency updates
+- Documented [X] review comments
+
 **Pattern-Based Improvements Applied:**
 - [Description of patterns found and applied to unreviewed areas]
 - [Count and type of improvements made based on systematic review findings]
@@ -321,6 +392,7 @@ bd dep add <new-consumer> <new-producer>
 
 **Summary Requirements:**
 - Clearly distinguish between systematic review fixes and pattern-based improvements
+- List specific Beads operations performed (create, update, close, dep add, comments add)
 - Provide specific counts and types of changes made
 - List any task splits with before/after identification
 - Confirm readiness for next phase
@@ -328,10 +400,26 @@ bd dep add <new-consumer> <new-producer>
 ### 6.2. Final Approval Process
 **User review and approval:**
 
-1. **Present updated Beads issues** using `bd list` and `bd stats`
-2. **Highlight major modifications** for user attention
+**Approval Workflow:**
+1. **Present updated Beads issues** using:
+   ```bash
+   bd list --status=ready
+   bd stats
+   bd activity --since="[review start]"
+   ```
+
+2. **Highlight major modifications** for user attention:
+   - Show split task details: `bd show <new-task-ids>`
+   - Display updated descriptions: `bd show <modified-task-ids>`
+   - Review comments added: `bd comments list <task-ids>`
+
 3. **Request explicit approval** to proceed
-4. **Address any user concerns** or additional changes
+
+4. **Address any user concerns** or additional changes:
+   - Apply further updates via `bd update` as needed
+   - Make additional splits via `bd create` if requested
+   - Refine dependencies via `bd dep add/remove`
+
 5. **Confirm completion** when user approves
 
 ---
@@ -343,7 +431,25 @@ After user approves the reviewed issues, they can start the Manager with `/apm-s
 The Manager will:
 1. Query Beads for ready tasks (`bd ready`)
 2. Spawn Implementation Agents via Task tool
-3. Track progress via Beads
+3. Track progress via Beads status updates and comments
+
+---
+
+## Beads Integration Summary
+
+**Preservation**: This guide preserves the complete systematic review methodology from APM:
+- Question-based analytical framework (§4.2) - UNCHANGED
+- User selection and approval gates (§3) - UNCHANGED
+- Pattern detection and application (§5.2) - UNCHANGED
+- Quality enhancement standards (§4.4) - UNCHANGED
+
+**Adaptation**: Only state management operations changed from markdown to Beads:
+- Plan modifications → `bd update --description`
+- Task splits → `bd create` + `bd close`
+- Dependency updates → `bd dep add/remove`
+- Review documentation → `bd comments add`
+
+**User Experience**: Workflow remains identical - agents propose, user selects, systematic analysis runs, comprehensive fixes applied, user approves. Only the backend storage changed.
 
 ---
 

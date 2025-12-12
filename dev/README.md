@@ -1,34 +1,50 @@
-# Development Directory
+# Beads + APM Integration
 
-This directory contains development versions of the kit files.
+Integrates [Beads](https://github.com/steveyegge/beads) issue tracking with [APM](https://github.com/sdi2200262/agentic-project-management) (Agentic Project Management) methodology for Claude Code.
 
-## Purpose
+## What This Is
 
-When developing this kit, edit files here instead of the production files in `.apm/` and `.claude/`. This prevents breaking your own workflow while developing.
+A ready-to-use kit that replaces APM's markdown-based state management with Beads issue tracking, and uses Claude Code's Task tool for agent spawning.
 
-## Structure
+## Installation
 
+### Quick Install
+
+```bash
+# Install in current directory
+curl -fsSL https://raw.githubusercontent.com/emulatalk1/beads-apm-integration/main/install.sh | bash
+
+# Install in specific directory
+curl -fsSL https://raw.githubusercontent.com/emulatalk1/beads-apm-integration/main/install.sh | bash -s /path/to/project
 ```
-dev/
-├── .apm/
-│   ├── guides/              # Development versions of methodology guides
-│   └── metadata.json        # Development metadata
-└── .claude/
-    └── commands/            # Development versions of slash commands
-```
 
-## Workflow
+The installer handles:
+- New projects - Initializes git, Beads, and APM files
+- Existing projects - Adds only what's missing
+- Existing APM projects - Migrates to Beads, backs up original files
+- Existing Beads projects - Adds APM methodology
 
-1. **Edit files here** - Make all changes in this directory
-2. **Test your changes** - Reference these files directly or copy temporarily to test
-3. **Sync to production** - When ready, run `../sync-dev.sh` to promote changes
-4. **Commit** - Review and commit the synced production files
+### Prerequisites
 
-## Key Points
+- Claude Code CLI
+- Node.js (for Beads CLI)
 
-- Files here are version controlled (committed to git)
-- Production files are synced FROM here, not the other way around
-- The install script uses production files from the repo's `main` branch
-- Your local dev work doesn't affect remote installations
+## Quick Start
 
-See `../DEVELOPMENT.md` for detailed workflow documentation.
+1. **Setup a new project**:
+   ```
+   /apm-setup
+   ```
+   Runs Context Synthesis and Project Breakdown, creating Beads issues.
+
+2. **Start work**:
+   ```
+   /apm-start
+   ```
+   Queries Beads for available work and spawns agents.
+
+## Learn More
+
+- **APM Methodology**: See the [original APM repository](https://github.com/sdi2200262/agentic-project-management) for detailed methodology documentation
+- **Beads**: Learn more at [Beads repository](https://github.com/steveyegge/beads)
+- **Project Files**: APM guides are in `.apm/guides/`, commands are in `.claude/commands/`
