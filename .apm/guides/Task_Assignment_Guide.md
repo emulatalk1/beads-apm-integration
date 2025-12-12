@@ -201,25 +201,72 @@ Only include when explicitly requested by user.
 
 ---
 
-## 3. Next Action Framework
+## 3. Beads Query Patterns for Manager
+
+Manager uses these Beads queries for task coordination and workflow management:
+
+### 3.1. Task Discovery Queries
+
+**Find available work:**
+```bash
+bd ready  # Get tasks with status=ready
+```
+
+**Check active work:**
+```bash
+bd list --status=in_progress  # See all in-progress tasks
+```
+
+**Find blocked tasks:**
+```bash
+bd blocked  # Get tasks with blockers
+```
+
+**View specific task details:**
+```bash
+bd show <issue-id>  # See full task context including dependencies
+```
+
+### 3.2. Task Management Commands
+
+**Assign task to agent:**
+```bash
+bd update <issue-id> --assign=<agent-name> --status=in_progress
+```
+
+**Create new tasks:**
+```bash
+bd create --title="Task title" --description="Details" --assignee=<agent-name>
+```
+
+**Check dependencies:**
+```bash
+bd show <issue-id>  # Dependencies shown in output
+```
+
+---
+
+## 4. Next Action Framework
 
 After Task tool returns results, determine next step:
 
-### 3.1. Continue Workflow
+### 4.1. Continue Workflow
 - Task complete → Check `bd ready` for next available task
 - Phase complete → Log to coordination notes, continue with next phase
+- Active work → Check `bd list --status=in_progress` to monitor
 
-### 3.2. Follow-Up Actions
+### 4.2. Follow-Up Actions
 - Task needs refinement → Spawn new agent to continue/fix
 - New requirements discovered → Create new issues with `bd create`
+- Blocked tasks → Check `bd blocked` to identify and resolve blockers
 
-### 3.3. Decision Criteria
+### 4.3. Decision Criteria
 
 | Status | Indicators | Action |
 |--------|------------|--------|
-| **Complete** | Issue closed, deliverables produced | Next task |
+| **Complete** | Issue closed, deliverables produced | Next task via `bd ready` |
 | **Partial** | Progress logged, issue still open | Continue or reassign |
-| **Blocked** | Blocker documented in comments | Resolve blocker first |
+| **Blocked** | Blocker documented in comments | Use `bd blocked` to review, resolve blocker first |
 
 ---
 
