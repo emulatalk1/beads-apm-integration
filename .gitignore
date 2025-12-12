@@ -57,3 +57,8 @@ venv/
 *.key
 credentials.json
 secrets.json
+
+# Development and testing
+*-test.md                    # Temporary test command files
+test-project/                # Local test installations
+.apm/guides.backup.*         # Guide backups from sync script
