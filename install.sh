@@ -117,9 +117,9 @@ detect_v0_1_0() {
 backup_and_remove() {
     local item="$1"       # file or directory path (relative to TARGET_DIR)
     local category="$2"   # "apm.guides" or "claude.commands"
+    local timestamp="$3"  # timestamp for backup directory (generated once per operation)
 
     if [ -e "$TARGET_DIR/$item" ]; then
-        timestamp="$(date +%Y%m%d%H%M%S)"
         backup_path="$TARGET_DIR/.backup/${timestamp}/${category}"
 
         mkdir -p "$backup_path"
@@ -133,12 +133,15 @@ backup_and_remove() {
 remove_v0_1_0() {
     echo -e "${YELLOW}Removing v0.1.0 installation...${NC}"
 
+    # Generate timestamp once for unified backup
+    local timestamp="$(date +%Y%m%d%H%M%S)"
+
     # Backup and remove .apm directory
-    backup_and_remove ".apm" "apm.guides"
+    backup_and_remove ".apm" "apm.guides" "$timestamp"
 
     # Backup and remove command files
-    backup_and_remove ".claude/commands/apm-setup.md" "claude.commands"
-    backup_and_remove ".claude/commands/apm-start.md" "claude.commands"
+    backup_and_remove ".claude/commands/apm-setup.md" "claude.commands" "$timestamp"
+    backup_and_remove ".claude/commands/apm-start.md" "claude.commands" "$timestamp"
 
     echo -e "${GREEN}✓ v0.1.0 removed${NC}"
 }
@@ -166,11 +169,13 @@ install_apm_guides() {
 
     # Download all guide files from dev/
     local guides=(
+        "Agent_Discovery_Guide.md"
+        "Agent_Workflow_Guide.md"
         "Context_Synthesis_Guide.md"
+        "Memory_System_Guide.md"
         "Project_Breakdown_Guide.md"
         "Project_Breakdown_Review_Guide.md"
         "Task_Assignment_Guide.md"
-        "Agent_Workflow_Guide.md"
     )
 
     for guide in "${guides[@]}"; do
@@ -241,8 +246,11 @@ EOF
 upgrade_apm_guides() {
     echo -e "${YELLOW}Upgrading APM guides...${NC}"
 
+    # Generate timestamp once for unified backup
+    local timestamp="$(date +%Y%m%d%H%M%S)"
+
     # Backup and remove existing guides
-    backup_and_remove ".apm/guides" "apm.guides"
+    backup_and_remove ".apm/guides" "apm.guides" "$timestamp"
 
     # Install fresh guides from GitHub
     install_apm_guides
@@ -251,9 +259,12 @@ upgrade_apm_guides() {
 upgrade_claude_commands() {
     echo -e "${YELLOW}Upgrading Claude commands...${NC}"
 
+    # Generate timestamp once for unified backup
+    local timestamp="$(date +%Y%m%d%H%M%S)"
+
     # Backup existing command files
-    backup_and_remove ".claude/commands/apm-setup.md" "claude.commands"
-    backup_and_remove ".claude/commands/apm-start.md" "claude.commands"
+    backup_and_remove ".claude/commands/apm-setup.md" "claude.commands" "$timestamp"
+    backup_and_remove ".claude/commands/apm-start.md" "claude.commands" "$timestamp"
 
     install_claude_commands
 }
@@ -463,8 +474,11 @@ case $INSTALL_TYPE in
         echo -e "${BLUE}Migrating original APM to Beads-APM...${NC}"
         echo ""
 
+        # Generate timestamp once for unified backup
+        timestamp="$(date +%Y%m%d%H%M%S)"
+
         # Backup and remove original APM guides
-        backup_and_remove ".apm" "apm.guides"
+        backup_and_remove ".apm" "apm.guides" "$timestamp"
 
         # Backup and remove original APM command files
         # Original APM uses 8 command files (apm-1 through apm-8) which conflict with Beads-APM.
@@ -481,7 +495,7 @@ case $INSTALL_TYPE in
         )
 
         for cmd_file in "${original_commands[@]}"; do
-            backup_and_remove ".claude/commands/${cmd_file}" "claude.commands"
+            backup_and_remove ".claude/commands/${cmd_file}" "claude.commands" "$timestamp"
         done
 
         # Install Beads if not present
