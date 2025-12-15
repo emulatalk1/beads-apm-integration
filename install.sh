@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Beads + APM Integration Installer v0.2.0
+# Beads + APM Integration Installer v0.2.1
 # Installs APM methodology with Beads issue tracking into your project
 # Fetches templates from GitHub
 
 set -e
 
-VERSION="0.2.0"
+VERSION="0.2.1"
 
 # Colors for output
 RED='\033[0;31m'
