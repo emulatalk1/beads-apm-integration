@@ -113,25 +113,32 @@ detect_v0_1_0() {
 # Installation Functions
 # ============================================================================
 
+# Backup and remove files/directories
+backup_and_remove() {
+    local item="$1"       # file or directory path (relative to TARGET_DIR)
+    local category="$2"   # "apm.guides" or "claude.commands"
+
+    if [ -e "$TARGET_DIR/$item" ]; then
+        timestamp="$(date +%Y%m%d%H%M%S)"
+        backup_path="$TARGET_DIR/.backup/${timestamp}/${category}"
+
+        mkdir -p "$backup_path"
+        cp -r "$TARGET_DIR/$item" "$backup_path/"
+        rm -rf "$TARGET_DIR/$item"
+
+        echo -e "${BLUE}  ✓ Backed up and removed: $item${NC}"
+    fi
+}
+
 remove_v0_1_0() {
     echo -e "${YELLOW}Removing v0.1.0 installation...${NC}"
 
-    # Remove .apm directory (no backup - this is an upgrade)
-    if [ -d "$TARGET_DIR/.apm" ]; then
-        echo -e "  Removing .apm directory..."
-        rm -rf "$TARGET_DIR/.apm"
-    fi
+    # Backup and remove .apm directory
+    backup_and_remove ".apm" "apm.guides"
 
-    # Remove apm-setup.md and apm-start.md commands
-    if [ -f "$TARGET_DIR/.claude/commands/apm-setup.md" ]; then
-        echo -e "  Removing apm-setup.md..."
-        rm -f "$TARGET_DIR/.claude/commands/apm-setup.md"
-    fi
-
-    if [ -f "$TARGET_DIR/.claude/commands/apm-start.md" ]; then
-        echo -e "  Removing apm-start.md..."
-        rm -f "$TARGET_DIR/.claude/commands/apm-start.md"
-    fi
+    # Backup and remove command files
+    backup_and_remove ".claude/commands/apm-setup.md" "claude.commands"
+    backup_and_remove ".claude/commands/apm-start.md" "claude.commands"
 
     echo -e "${GREEN}✓ v0.1.0 removed${NC}"
 }
@@ -234,12 +241,8 @@ EOF
 upgrade_apm_guides() {
     echo -e "${YELLOW}Upgrading APM guides...${NC}"
 
-    # Backup existing guides
-    if [ -d "$TARGET_DIR/.apm/guides" ]; then
-        backup_dir="$TARGET_DIR/.apm/guides.backup.$(date +%Y%m%d%H%M%S)"
-        cp -r "$TARGET_DIR/.apm/guides" "$backup_dir"
-        echo -e "${BLUE}  Backed up existing guides to ${backup_dir}${NC}"
-    fi
+    # Backup and remove existing guides
+    backup_and_remove ".apm/guides" "apm.guides"
 
     # Install fresh guides from GitHub
     install_apm_guides
@@ -247,6 +250,11 @@ upgrade_apm_guides() {
 
 upgrade_claude_commands() {
     echo -e "${YELLOW}Upgrading Claude commands...${NC}"
+
+    # Backup existing command files
+    backup_and_remove ".claude/commands/apm-setup.md" "claude.commands"
+    backup_and_remove ".claude/commands/apm-start.md" "claude.commands"
+
     install_claude_commands
 }
 
@@ -455,22 +463,12 @@ case $INSTALL_TYPE in
         echo -e "${BLUE}Migrating original APM to Beads-APM...${NC}"
         echo ""
 
-        # Create unified backup directory structure
-        timestamp="$(date +%Y%m%d%H%M%S)"
-        backup_dir="$TARGET_DIR/.backup/${timestamp}/.apm"
-        commands_backup_dir="$TARGET_DIR/.backup/${timestamp}/.claude/commands"
-
-        # Backup original APM
-        if [ -d "$TARGET_DIR/.apm" ]; then
-            mkdir -p "$backup_dir"
-            cp -r "$TARGET_DIR/.apm/"* "$backup_dir/"
-            echo -e "${BLUE}  Backed up original APM to ${backup_dir}${NC}"
-        fi
+        # Backup and remove original APM guides
+        backup_and_remove ".apm" "apm.guides"
 
         # Backup and remove original APM command files
         # Original APM uses 8 command files (apm-1 through apm-8) which conflict with Beads-APM.
-        # We backup these files to .backup/TIMESTAMP/.claude/commands/ before removing them.
-        # This preserves any customizations users may have made while allowing Beads-APM to work.
+        echo -e "${YELLOW}Backing up and removing original APM command files...${NC}"
         original_commands=(
             "apm-1-initiate-setup.md"
             "apm-2-initiate-manager.md"
@@ -482,41 +480,17 @@ case $INSTALL_TYPE in
             "apm-8-delegate-debug.md"
         )
 
-        # Check if any original commands exist
-        has_original_commands=false
         for cmd_file in "${original_commands[@]}"; do
-            if [ -f "$TARGET_DIR/.claude/commands/${cmd_file}" ]; then
-                has_original_commands=true
-                break
-            fi
+            backup_and_remove ".claude/commands/${cmd_file}" "claude.commands"
         done
-
-        if $has_original_commands; then
-            echo -e "${YELLOW}Backing up and removing original APM command files...${NC}"
-            mkdir -p "$commands_backup_dir"
-
-            for cmd_file in "${original_commands[@]}"; do
-                if [ -f "$TARGET_DIR/.claude/commands/${cmd_file}" ]; then
-                    cp "$TARGET_DIR/.claude/commands/${cmd_file}" "$commands_backup_dir/${cmd_file}"
-                    rm "$TARGET_DIR/.claude/commands/${cmd_file}"
-                    echo -e "  Backed up and removed: ${cmd_file}"
-                fi
-            done
-
-            echo -e "${BLUE}  Backed up original APM commands to ${commands_backup_dir}${NC}"
-        fi
 
         # Install Beads if not present
         if ! $HAS_BEADS; then
             install_beads
         fi
 
-        # Replace APM guides with Beads-aware versions
-        echo -e "${YELLOW}Replacing original APM guides with Beads-APM guides...${NC}"
-        rm -rf "$TARGET_DIR/.apm/guides"
+        # Install Beads-APM guides and commands
         install_apm_guides
-
-        # Install/upgrade Claude commands
         install_claude_commands
 
         # Update CLAUDE.md
@@ -530,15 +504,13 @@ case $INSTALL_TYPE in
         echo -e "${GREEN}Migration complete!${NC}"
         echo ""
         echo -e "${YELLOW}Important notes:${NC}"
-        echo -e "  • Original APM backed up to: ${backup_dir}"
-        if $has_original_commands; then
-            echo -e "  • Original APM commands backed up to: ${commands_backup_dir}"
-        fi
+        echo -e "  • Original APM backed up to: .backup/{timestamp}/apm.guides/"
+        echo -e "  • Original APM commands backed up to: .backup/{timestamp}/claude.commands/"
         echo -e "  • Original APM used markdown files for state management"
         echo -e "  • Beads-APM uses 'bd' commands instead"
         echo ""
-        echo -e "${YELLOW}If you have existing tasks in Implementation_Plan.md:${NC}"
-        echo -e "  1. Review your old plan: cat ${backup_dir}/docs/Implementation_Plan.md"
+        echo -e "${YELLOW}If you have existing tasks in markdown files:${NC}"
+        echo -e "  1. Find backups: ls -la .backup/"
         echo -e "  2. Create issues in Beads: bd create --title=\"Task name\" --type=task"
         echo -e "  3. Add dependencies: bd dep add <consumer> <producer>"
         ;;
